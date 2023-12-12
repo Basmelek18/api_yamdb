@@ -6,7 +6,9 @@ from .views import (
     ReviewViewSet,
     CommentViewSet,
     SignUpView,
-    VerifyCodeView
+    VerifyCodeView,
+    TitleViewSet,
+    GenreViewSet
 )
 
 
@@ -29,6 +31,16 @@ router_v1.register(
     r'titles/(?P<post_id>\d+)/reviews/(?P<post_id>\d+)/comments',
     CommentViewSet,
     basename='comment'
+)
+router_v1.register(
+    r'titles',
+    TitleViewSet,
+    basename='titles'
+)
+router_v1.register(
+    r'genres',
+    GenreViewSet,
+    basename='genres'
 )
 
 

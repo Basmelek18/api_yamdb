@@ -4,19 +4,21 @@ import random
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, pagination, status
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly
 )
+from rest_framework import viewsets, pagination, status, mixins
+from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .filter import TitleFilters
-from .permissions import IsAuthorModeratorAdminOrReadOnly
-from reviews.models import Category, Title, Review
+from .permissions import IsAuthorModeratorAdminOrReadOnly, IsAdmin, ReadOnly
+from reviews.models import Category, Title, Review, Genre
+
 from .serializers import (
     CommentSerializer,
     ReviewSerializer,
@@ -32,7 +34,20 @@ class CategoryViewSet(CreateListDestroyMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = pagination.LimitOffsetPagination
-    permission_classes = (IsAuthorModeratorAdminOrReadOnly,)
+    permission_classes = (IsAdmin | ReadOnly,)
+)
+from users.models import UserYamDb
+
+
+class GenreViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdmin, ReadOnly)
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
