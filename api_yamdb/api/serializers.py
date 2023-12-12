@@ -4,6 +4,12 @@ from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import UserYamDb
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        exclude = ('id',)
+        model = Category
+
+
 class GanreSerializer(serializers.ModelSerializer):
     class Meta:
         exclude = ('id',)
