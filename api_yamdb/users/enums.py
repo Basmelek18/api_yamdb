@@ -6,7 +6,6 @@ class UserRole(Enum):
     USER = 'user'
     MODERATOR = 'moderator'
 
-
-@classmethod
-def choices(cls):
-    return [(key.value, key.name) for key in cls]
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
