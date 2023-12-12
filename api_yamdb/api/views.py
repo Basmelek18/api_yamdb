@@ -1,3 +1,4 @@
+from django_filters.rest_framework import DjangoFilterBackend
 import random
 
 from django.core.mail import send_mail
@@ -7,9 +8,24 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from api.filter import TitleFilters
+from api.permissions import IsAuthorModeratorAdminOrReadOnly
 from reviews.models import Title, Review
-from .serializers import ReviewSerializer, CommentSerializer
+from .serializers import CommentSerializer, ReviewSerializer, TitleReadSerializer, TitleWriteSerializer
+
 from users.models import UserYamDb
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    permission_classes = (IsAuthorModeratorAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilters
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitleReadSerializer
+        return TitleWriteSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

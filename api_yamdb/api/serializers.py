@@ -1,6 +1,31 @@
 from rest_framework import serializers, validators
 
-from reviews.models import Comment, Review
+from reviews.models import Category, Comment, Genre, Review, Title
+
+
+class TitleReadSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    genre = GanreSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Title,
+        fields = '__all__'
+
+
+class TitleWriteSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug',
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.ojects.all(),
+        slug_field='slug',
+        many=True,
+    )
+
+    class Meta:
+        model = Title,
+        fields = '__all__'
 
 from users.models import UserYamDb
 
