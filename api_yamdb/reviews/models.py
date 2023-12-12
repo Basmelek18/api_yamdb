@@ -5,6 +5,25 @@ from django.utils import timezone
 from users.models import UserYamDb
 
 
+class Category(models.Model):
+    """Модуль категории"""
+    name = models.CharField(
+        verbose_name='Название',
+        max_length=256,
+    )
+    slug = models.SlugField(
+        verbose_name='Слаг',
+        max_length=50,
+        unique=True,
+    )
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        ordering = ('name',)
+
+
+
 class Title(models.Model):
     """Модель произведений"""
     name = models.CharField(
