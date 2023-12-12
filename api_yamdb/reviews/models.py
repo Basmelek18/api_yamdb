@@ -1,7 +1,46 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
 
 from users.models import UserYamDb
+
+
+class Title(models.Model):
+    """Модель произведений"""
+    name = models.CharField(
+        verbose_name='Название',
+        max_length=256,
+    )
+    year = models.PositiveSmallIntegerField(
+        verbose_name='Год выпуска',
+        validators=[
+            MaxValueValidator(timezone.now().year)
+        ],
+    )
+    description = models.CharField(
+        verbose_name='Описание',
+        blank=True,
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        through='GenreTitle',
+        verbose_name='Жанр',
+    )
+    category = models.ForeignKey(
+        Category,
+        verbose_name='Категории',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        ordering = ('year', 'name')
+
+    def __str__(self):
+        return self.name
 
 
 class Review(models.Model):
