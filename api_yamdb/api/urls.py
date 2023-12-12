@@ -1,8 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
-
-from .views import ReviewViewSet, SignupView, TokenTakenView
+from .views import (
+    ReviewViewSet,
+    CommentViewSet,
+    SignupView,
+    TokenTakenView
+)
 
 
 router_v1 = SimpleRouter()
@@ -11,6 +15,12 @@ router_v1.register(
     r'titles/(?P<post_id>\d+)/reviews',
     ReviewViewSet,
     basename='reviews'
+)
+
+router_v1.register(
+    r'titles/(?P<post_id>\d+)/reviews/(?P<post_id>\d+)/comments',
+    CommentViewSet,
+    basename='comment'
 )
 
 
