@@ -1,6 +1,13 @@
 from rest_framework import serializers, validators
 
 from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import UserYamDb
+
+
+class GanreSerializer(serializers.ModelSerializer):
+    class Meta:
+        exclude = ('id',)
+        model = Genre
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
@@ -26,8 +33,6 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title,
         fields = '__all__'
-
-from users.models import UserYamDb
 
 
 class ReviewSerializer(serializers.ModelSerializer):
