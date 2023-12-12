@@ -6,7 +6,7 @@ from .views import ReviewViewSet
 router = SimpleRouter()
 
 router.register(
-    'title/<int:title_id>/reviews',
+    r'titles/(?P<post_id>\d+)/reviews',
     ReviewViewSet,
     basename='reviews'
 )
