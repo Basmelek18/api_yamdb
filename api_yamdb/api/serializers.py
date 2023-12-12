@@ -1,0 +1,29 @@
+from rest_framework import serializers, validators
+
+from reviews.models import Review
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    title = serializers.SlugRelatedField(
+        slug_field='name',
+        read_only=True
+    )
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
+
+    class Meta:
+        model = Review
+        fields = ('id', 'title', 'text', 'author', 'score', 'pub_date',)
+        validators = [
+            validators.UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=('title', 'author'),
+                message=(
+                    'Валидация на уникальность данных не пройдена: '
+                    f'запись с полями {fields} уже существует. Пользователь '
+                    'может оставить только один отзыв на произведение!'
+                )
+            )
+        ]
