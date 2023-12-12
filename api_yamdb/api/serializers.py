@@ -1,6 +1,6 @@
 from rest_framework import serializers, validators
 
-from reviews.models import Review
+from reviews.models import Comment, Review
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -27,3 +27,18 @@ class ReviewSerializer(serializers.ModelSerializer):
                 )
             )
         ]
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    review = serializers.SlugRelatedField(
+        slug_field='text',
+        read_only=True
+    )
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'review', 'text', 'author', 'pub_date',)
