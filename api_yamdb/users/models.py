@@ -35,6 +35,7 @@ class UserYamDb(AbstractUser):
         choices=UserRole.choices(),
         default=UserRole.USER
     )
+    confirmation_code = models.CharField(max_length=6)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('first_name', 'last_name', 'username')

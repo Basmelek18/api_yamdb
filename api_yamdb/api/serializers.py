@@ -27,6 +27,8 @@ class TitleWriteSerializer(serializers.ModelSerializer):
         model = Title,
         fields = '__all__'
 
+from users.models import UserYamDb
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     title = serializers.SlugRelatedField(
@@ -67,3 +69,9 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'review', 'text', 'author', 'pub_date',)
+
+
+class ConfirmationCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserYamDb
+        fields = ['confirmation_code']
