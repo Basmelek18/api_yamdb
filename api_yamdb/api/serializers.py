@@ -49,4 +49,4 @@ class CommentSerializer(serializers.ModelSerializer):
 class ConfirmationCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserYamDb
-        fields = ['code']
+        fields = ['confirmation_code']
