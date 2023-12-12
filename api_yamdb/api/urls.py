@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
 from .views import (
+    CategoryViewSet,
     ReviewViewSet,
     CommentViewSet,
     SignUpView,
@@ -10,6 +11,13 @@ from .views import (
 
 
 router_v1 = SimpleRouter()
+
+
+router_v1.register(
+    'categories',
+    CategoryViewSet,
+    basename='categories'
+)
 
 router_v1.register(
     r'titles/(?P<post_id>\d+)/reviews',
