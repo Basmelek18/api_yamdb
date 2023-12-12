@@ -35,8 +35,6 @@ class CategoryViewSet(CreateListDestroyMixin):
     serializer_class = CategorySerializer
     pagination_class = pagination.LimitOffsetPagination
     permission_classes = (IsAdmin | ReadOnly,)
-)
-from users.models import UserYamDb
 
 
 class GenreViewSet(
