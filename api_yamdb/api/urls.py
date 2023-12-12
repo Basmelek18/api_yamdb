@@ -22,13 +22,13 @@ router_v1.register(
 )
 
 router_v1.register(
-    r'titles/(?P<post_id>\d+)/reviews',
+    r'titles/(?P<title_id>\d+)/reviews',
     ReviewViewSet,
     basename='reviews'
 )
 
 router_v1.register(
-    r'titles/(?P<post_id>\d+)/reviews/(?P<post_id>\d+)/comments',
+    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
     CommentViewSet,
     basename='comment'
 )
