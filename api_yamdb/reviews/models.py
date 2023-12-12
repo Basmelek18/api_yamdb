@@ -5,8 +5,11 @@ from django.utils import timezone
 from users.models import UserYamDb
 
 
-class Category(models.Model):
-    """Модуль категории"""
+class BaseModel(models.Model):
+    """
+    Абстрактная модель.
+    Добавляет к модели название и slug.
+    """
     name = models.CharField(
         verbose_name='Название',
         max_length=256,
@@ -18,10 +21,26 @@ class Category(models.Model):
     )
 
     class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.name
+
+
+class Genre(BaseModel):
+    """Модуль жанры."""
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+        ordering = ('name',)
+
+
+class Category(BaseModel):
+    """Модуль категории."""
+    class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
         ordering = ('name',)
-
 
 
 class Title(models.Model):
