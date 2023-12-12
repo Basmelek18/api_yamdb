@@ -3,17 +3,37 @@ import random
 
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, pagination, status
+from rest_framework import viewsets, pagination, status, mixins
+from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from api.filter import TitleFilters
-from api.permissions import IsAuthorModeratorAdminOrReadOnly
-from reviews.models import Title, Review
-from .serializers import CommentSerializer, ReviewSerializer, TitleReadSerializer, TitleWriteSerializer
-
+from api.permissions import IsAuthorModeratorAdminOrReadOnly, IsAdmin, ReadOnly
+from reviews.models import Title, Genre, Review
+from .serializers import (
+    CommentSerializer,
+    ReviewSerializer,
+    TitleReadSerializer,
+    TitleWriteSerializer,
+    GenreSerializer
+)
 from users.models import UserYamDb
+
+
+class GenreViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdmin, ReadOnly)
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
