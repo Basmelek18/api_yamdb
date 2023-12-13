@@ -1,10 +1,10 @@
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from .enums import UserRole
 
 
-class UserYamDb(AbstractBaseUser):
+class UserYamDb(AbstractUser):
     email = models.EmailField(
         verbose_name='Электронная почта',
         unique=True,
