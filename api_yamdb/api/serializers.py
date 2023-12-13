@@ -56,17 +56,17 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ('id', 'title', 'text', 'author', 'score', 'pub_date',)
-        validators = [
-            validators.UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=('title', 'author'),
-                message=(
-                    'Валидация на уникальность данных не пройдена: '
-                    f'запись с полями {fields} уже существует. Пользователь '
-                    'может оставить только один отзыв на произведение!'
-                )
-            )
-        ]
+        # validators = [
+        #     validators.UniqueTogetherValidator(
+        #         queryset=Review.objects.all(),
+        #         fields=('title', 'author'),
+        #         message=(
+        #             'Валидация на уникальность данных не пройдена: '
+        #             f'запись с полями {fields} уже существует. Пользователь '
+        #             'может оставить только один отзыв на произведение!'
+        #         )
+        #     )
+        # ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
