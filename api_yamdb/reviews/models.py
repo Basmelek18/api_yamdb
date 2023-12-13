@@ -58,18 +58,21 @@ class Title(models.Model):
     description = models.CharField(
         verbose_name='Описание',
         blank=True,
+        max_length=256,
     )
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
         verbose_name='Жанр',
+        related_name='title_genre'
     )
     category = models.ForeignKey(
         Category,
         verbose_name='Категории',
         on_delete=models.SET_NULL,
         blank=True,
-        null=True
+        null=True,
+        related_name='title_category'
     )
 
     class Meta:
@@ -83,8 +86,16 @@ class Title(models.Model):
 
 class GenreTitle(models.Model):
     """Модель связи произведений и жанров"""
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='title_genre'
+    )
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE,
+        related_name='genre_title'
+    )
 
     def __str__(self):
         return f'{self.title} {self.genre}'
