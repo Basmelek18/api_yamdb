@@ -6,7 +6,7 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework import viewsets, pagination, status
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
@@ -165,25 +165,21 @@ class UserMeView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = UserYamDb.objects.all()
     serializer_class = UserYamDbSerializer
-    pagination_class = pagination.LimitOffsetPagination
+    permission_classes = (IsAdmin,)
+    pagination_class = pagination.PageNumberPagination
     search_fields = ('username',)
 
     @action(
-        methods=['GET'],
+        methods=['GET', 'PATCH'],
         detail=False,
         url_path='me',
+        permission_classes=(IsAuthenticated,)
     )
     def get_current_user_info(self, request):
-        serializer = UserYamDbSerializer(request.user)
-        return Response(serializer.data)
-
-    @action(
-        methods=['PATCH'],
-        detail=False,
-        url_path='me',
-    )
-    def get_current_user_info(self, request):
-        serializer = UserYamDbSerializer(
+        if request.method == 'GET':
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = self.get_serializer(
             request.user,
             data=request.data,
             partial=True,
