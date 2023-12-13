@@ -27,6 +27,7 @@ from .serializers import (
     CategorySerializer,
     GenreSerializer,
     UserYamDbSerializer,
+    ConfirmationCodeSerializer,
 )
 from .mixins import CreateListDestroyMixin
 from users.models import UserYamDb
@@ -110,6 +111,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class SignUpView(APIView):
     def post(self, request):
+        serializer = ConfirmationCodeSerializer(data=request.data)
         username = request.data.get('username')
         email = request.data.get('email')
         code = ''.join(random.choice('0123456789') for _ in range(6))
@@ -122,11 +124,15 @@ class SignUpView(APIView):
             fail_silently=True,
         )
 
-        return Response({'message': 'Code generated successfully'}, status=status.HTTP_200_OK)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class VerifyCodeView(APIView):
     def post(self, request):
+        serializer = ConfirmationCodeSerializer
         user = request.user
         username = request.request.data.get('username')
         confirmation_code = request.data.get('confirmation_code')
@@ -137,7 +143,7 @@ class VerifyCodeView(APIView):
         refresh = RefreshToken.for_user(user)
         token = str(refresh.token)
 
-        return Response({'token': token})
+        return Response(serializer.data)
 
 
 class UserMeView(APIView):
