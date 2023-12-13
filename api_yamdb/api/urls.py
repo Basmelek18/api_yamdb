@@ -55,5 +55,5 @@ urlpatterns = [
     path('v1/', include(router_v1.urls)),
     path('v1/auth/signup/', SignUpView.as_view(), name='signup'),
     path('v1/auth/token/', VerifyCodeView.as_view(), name='verify'),
-    path('v1/users/me/', UserMeView.as_view(), name='users_prof'),
+    # path('v1/users/me/', UserMeView.as_view(), name='users_prof'),
 ]
