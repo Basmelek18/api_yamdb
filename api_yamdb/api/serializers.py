@@ -1,6 +1,6 @@
 from django.core.validators import RegexValidator, EmailValidator
 from rest_framework import serializers, validators
-from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import UserYamDb
@@ -93,6 +93,10 @@ class ConfirmationCodeSerializer(serializers.ModelSerializer):
                 message='Field should contain only letters, digits, and @/./+/-/_ characters.',
                 code='invalid_characters',
             ),
+            UniqueValidator(
+                queryset=UserYamDb.objects.all(),
+                message='Пользователь с таким username уже существует',
+            ),
         ],
     )
     email = serializers.EmailField(
@@ -100,9 +104,20 @@ class ConfirmationCodeSerializer(serializers.ModelSerializer):
         validators=[
             EmailValidator(
                 message='Enter a valid email address.'
-            )
+            ),
+            UniqueValidator(
+                queryset=UserYamDb.objects.all(),
+                message='Пользователь с таким username уже существует',
+            ),
         ]
     )
+
+    def validate_username(self, value):
+        if 'me' == value:
+            raise serializers.ValidationError(
+                "Вы не можете создать пользователя с именем me"
+            )
+        return value
 
     class Meta:
         model = UserYamDb
@@ -113,6 +128,27 @@ class ConfirmationCodeSerializer(serializers.ModelSerializer):
                 fields=('email', 'username',),
             )
         ]
+
+
+class TokenSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        max_length=150,
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message='Field should contain only letters, digits, and @/./+/-/_ characters.',
+                code='invalid_characters',
+            ),
+        ],
+    )
+    confirmation_code = serializers.IntegerField()
+
+    class Meta:
+        model = UserYamDb
+        fields = (
+            'username',
+            'confirmation_code',
+        )
 
 
 class UserYamDbSerializer(serializers.ModelSerializer):
