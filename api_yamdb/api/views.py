@@ -26,6 +26,7 @@ from .serializers import (
     GenreSerializer,
     UserYamDbSerializer,
     ConfirmationCodeSerializer,
+    TokenSerializer
 )
 from .mixins import CreateListDestroyMixin
 from users.models import UserYamDb
@@ -133,18 +134,18 @@ class SignUpView(APIView):
 
 class VerifyCodeView(APIView):
     def post(self, request):
-        serializer = ConfirmationCodeSerializer
-        user = request.user
-        username = request.request.data.get('username')
+        serializer = TokenSerializer(data=request.data)
+        username = request.data.get('username')
         confirmation_code = request.data.get('confirmation_code')
+        confirmation_user = get_object_or_404(UserYamDb, username=username)
 
-        confirmation_code = get_object_or_404(UserYamDb, username=username, confirmation_code=confirmation_code)
-        confirmation_code.delete()
+        refresh = RefreshToken.for_user(confirmation_user)
+        custom_response = {"token": str(refresh)}
 
-        refresh = RefreshToken.for_user(user)
-        token = str(refresh.token)
-
-        return Response(serializer.data)
+        if serializer.is_valid():
+            if confirmation_code == confirmation_user.confirmation_code:
+                return Response(custom_response, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserMeView(APIView):
