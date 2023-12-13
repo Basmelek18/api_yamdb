@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework.filters import SearchFilter
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import viewsets, pagination, status
 from rest_framework.filters import SearchFilter
@@ -166,3 +167,27 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserYamDbSerializer
     pagination_class = pagination.LimitOffsetPagination
     search_fields = ('username',)
+
+    @action(
+        methods=['GET'],
+        detail=False,
+        url_path='me',
+    )
+    def get_current_user_info(self, request):
+        serializer = UserYamDbSerializer(request.user)
+        return Response(serializer.data)
+
+    @action(
+        methods=['PATCH'],
+        detail=False,
+        url_path='me',
+    )
+    def get_current_user_info(self, request):
+        serializer = UserYamDbSerializer(
+            request.user,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
