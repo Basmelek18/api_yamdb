@@ -23,7 +23,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(read_only=True, many=True)
 
     class Meta:
-        model = Title,
+        model = Title
         fields = '__all__'
 
 
@@ -39,7 +39,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Title,
+        model = Title
         fields = '__all__'
 
 
