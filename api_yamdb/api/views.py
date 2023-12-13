@@ -25,7 +25,8 @@ from .serializers import (
     TitleReadSerializer,
     TitleWriteSerializer,
     CategorySerializer,
-    GenreSerializer
+    GenreSerializer,
+    UserYamDbSerializer
 )
 from .mixins import CreateListDestroyMixin
 from users.models import UserYamDb
@@ -137,3 +138,8 @@ class VerifyCodeView(APIView):
         token = str(refresh.token)
 
         return Response({'token': token})
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = UserYamDb.objects.all()
+    serializer_class = UserYamDbSerializer

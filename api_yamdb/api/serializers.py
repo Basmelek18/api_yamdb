@@ -86,3 +86,9 @@ class ConfirmationCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserYamDb
         fields = ['confirmation_code']
+
+
+class UserYamDbSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserYamDb
+        fields = '__all__'

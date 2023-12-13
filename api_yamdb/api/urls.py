@@ -8,7 +8,8 @@ from .views import (
     SignUpView,
     VerifyCodeView,
     TitleViewSet,
-    GenreViewSet
+    GenreViewSet,
+    UserViewSet
 )
 
 
@@ -41,6 +42,11 @@ router_v1.register(
     r'genres',
     GenreViewSet,
     basename='genres'
+)
+router_v1.register(
+    'users',
+    UserViewSet,
+    basename='users'
 )
 
 
