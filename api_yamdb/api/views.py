@@ -25,6 +25,7 @@ from .serializers import (
     TitleReadSerializer,
     TitleWriteSerializer,
     CategorySerializer,
+    GenreSerializer
 )
 from .mixins import CreateListDestroyMixin
 from users.models import UserYamDb
@@ -37,15 +38,10 @@ class CategoryViewSet(CreateListDestroyMixin):
     permission_classes = (IsAdmin | ReadOnly,)
 
 
-class GenreViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
+class GenreViewSet(CreateListDestroyMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdmin, ReadOnly)
+    permission_classes = (IsAdmin | ReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'

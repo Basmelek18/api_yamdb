@@ -10,7 +10,7 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
 
 
-class GanreSerializer(serializers.ModelSerializer):
+class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         exclude = ('id',)
         model = Genre
@@ -18,7 +18,7 @@ class GanreSerializer(serializers.ModelSerializer):
 
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
-    genre = GanreSerializer(read_only=True, many=True)
+    genre = GenreSerializer(read_only=True, many=True)
 
     class Meta:
         model = Title,
