@@ -1,4 +1,6 @@
+from django.core.validators import RegexValidator
 from rest_framework import serializers, validators
+from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import UserYamDb
@@ -85,10 +87,37 @@ class CommentSerializer(serializers.ModelSerializer):
 class ConfirmationCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserYamDb
-        fields = ['confirmation_code']
+        fields = ('confirmation_code',)
 
 
 class UserYamDbSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        max_length=150,
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message='Field should contain only letters, digits, and @/./+/-/_ characters.',
+                code='invalid_characters',
+            ),
+        ],
+    )
+    email = serializers.CharField(max_length=254,)
+    first_name = serializers.CharField(max_length=150, )
+    last_name = serializers.CharField(max_length=150, )
+
     class Meta:
         model = UserYamDb
-        fields = '__all__'
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=UserYamDb.objects.all(),
+                fields=('username', 'email'),
+            )
+        ]

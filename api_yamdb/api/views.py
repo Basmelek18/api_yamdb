@@ -26,7 +26,7 @@ from .serializers import (
     TitleWriteSerializer,
     CategorySerializer,
     GenreSerializer,
-    UserYamDbSerializer
+    UserYamDbSerializer,
 )
 from .mixins import CreateListDestroyMixin
 from users.models import UserYamDb
@@ -140,6 +140,22 @@ class VerifyCodeView(APIView):
         return Response({'token': token})
 
 
+class UserMeView(APIView):
+    def get(self, request):
+        users = UserYamDb.objects.all()
+        serializer = UserYamDbSerializer(users, many=True)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        serializer = UserYamDbSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = UserYamDb.objects.all()
     serializer_class = UserYamDbSerializer
+    pagination_class = pagination.LimitOffsetPagination
+    search_fields = ('username',)
