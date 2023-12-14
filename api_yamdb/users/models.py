@@ -9,9 +9,9 @@ MODERATOR = 'moderator'
 
 
 ROLE_CHOICES = (
-    (USER,),
-    (MODERATOR,),
-    (ADMIN,),
+    (USER, USER),
+    (MODERATOR, MODERATOR),
+    (ADMIN, ADMIN),
 )
 
 
