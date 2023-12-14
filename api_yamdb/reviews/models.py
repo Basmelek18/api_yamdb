@@ -36,7 +36,7 @@ class Genre(BaseModel):
 
 
 class Category(BaseModel):
-    """Модуль категории."""
+    """Модель категорий."""
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
@@ -102,6 +102,7 @@ class GenreTitle(models.Model):
 
 
 class Review(models.Model):
+    """Модель отзывов."""
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -142,9 +143,10 @@ class Review(models.Model):
 
     def __str__(self):
         return self.text
-    
+
 
 class Comment(models.Model):
+    """Модель комментариев."""
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
