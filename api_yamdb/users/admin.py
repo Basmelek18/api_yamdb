@@ -4,11 +4,9 @@ from .models import UserYamDb
 
 
 @admin.register(UserYamDb)
-class UserAdmin(admin.ModelAdmin):
+class UserYamDbAdmin(admin.ModelAdmin):
     list_display = (
-        'pk',
         'username',
-        'confirmation_code',
         'email',
         'role',
         'is_superuser',
