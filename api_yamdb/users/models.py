@@ -8,11 +8,7 @@ USER = 'user'
 MODERATOR = 'moderator'
 
 
-ROLE_CHOICES = (
-    (USER, USER),
-    (MODERATOR, MODERATOR),
-    (ADMIN, ADMIN),
-)
+ROLE_CHOICES = (USER, MODERATOR, ADMIN)
 
 
 class UserYamDb(AbstractUser):
@@ -61,11 +57,7 @@ class UserYamDb(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == (
-            ADMIN
-            or self.is_superuser
-            or self.is_staff
-        )
+        return self.role == ADMIN
 
     @property
     def is_moderator(self):
