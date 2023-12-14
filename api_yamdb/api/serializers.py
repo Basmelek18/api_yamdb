@@ -163,8 +163,7 @@ class UserYamDbSerializer(serializers.ModelSerializer):
         ],
     )
     email = serializers.EmailField(max_length=254,)
-    first_name = serializers.CharField(max_length=150, )
-    last_name = serializers.CharField(max_length=150, )
+    role = serializers.StringRelatedField()
 
     class Meta:
         model = UserYamDb
