@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets, pagination, status
+from rest_framework import viewsets, status
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -39,7 +39,6 @@ from users.models import UserYamDb
 class CategoryViewSet(CreateListDestroyMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    pagination_class = pagination.PageNumberPagination
     permission_classes = (IsAdmin | ReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
@@ -49,7 +48,6 @@ class CategoryViewSet(CreateListDestroyMixin):
 class GenreViewSet(CreateListDestroyMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    pagination_class = pagination.PageNumberPagination
     permission_classes = (IsAdmin | ReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
@@ -72,7 +70,6 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    pagination_class = pagination.PageNumberPagination
     permission_classes = (
         IsAuthorModeratorAdminOrReadOnly,
     )
@@ -94,7 +91,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    pagination_class = pagination.PageNumberPagination
     permission_classes = (
         IsAuthorModeratorAdminOrReadOnly,
     )
@@ -170,7 +166,6 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = UserYamDb.objects.all()
     serializer_class = UserYamDbSerializer
     permission_classes = (IsAdmin,)
-    pagination_class = pagination.PageNumberPagination
     search_fields = ('username',)
 
     @action(
