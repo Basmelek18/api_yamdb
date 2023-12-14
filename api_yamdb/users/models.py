@@ -5,6 +5,7 @@ from .enums import UserRole
 
 
 class UserYamDb(AbstractUser):
+    """Модель кастомного пользователя."""
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('first_name', 'last_name', 'username')
 
