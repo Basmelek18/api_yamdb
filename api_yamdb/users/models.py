@@ -1,7 +1,18 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from .enums import UserRole
+# from .enums import UserRole
+
+ADMIN = 'admin'
+USER = 'user'
+MODERATOR = 'moderator'
+
+
+ROLE_CHOICES = (
+    (USER, USER),
+    (MODERATOR, MODERATOR),
+    (ADMIN, ADMIN),
+)
 
 
 class UserYamDb(AbstractUser):
@@ -32,8 +43,8 @@ class UserYamDb(AbstractUser):
     role = models.CharField(
         verbose_name='Роль',
         max_length=20,
-        choices=UserRole.choices(),
-        default=UserRole.USER
+        choices=ROLE_CHOICES,
+        default=USER
     )
     confirmation_code = models.CharField(max_length=6)
 
@@ -51,15 +62,15 @@ class UserYamDb(AbstractUser):
     @property
     def is_admin(self):
         return self.role == (
-            UserRole.ADMIN.value
+            ADMIN
             or self.is_superuser
             or self.is_staff
         )
 
     @property
     def is_moderator(self):
-        return self.role == UserRole.MODERATOR.value
+        return self.role == MODERATOR
 
     @property
     def is_user(self):
-        return self.role == UserRole.USER.value
+        return self.role == USER
