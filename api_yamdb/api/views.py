@@ -120,7 +120,12 @@ class SignUpView(APIView):
         code = ''.join(random.choice('0123456789') for _ in range(6))
 
         if serializer.is_valid():
-            UserYamDb.objects.create(username=username, email=email, confirmation_code=code)
+            if UserYamDb.objects.filter(username=username):
+                UserYamDb.objects.filter(username=username).update(confirmation_code=code)
+            else:
+                if UserYamDb.objects.filter(email=email):
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                UserYamDb.objects.create(username=username, email=email, confirmation_code=code)
             send_mail(
                 subject='Ваш код для входа в систему',
                 message=f'{code}',
