@@ -6,7 +6,7 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
@@ -37,6 +37,10 @@ from users.models import UserYamDb
 
 
 class CategoryViewSet(CreateListDestroyMixin):
+    """
+    Представление модели Category.
+    Обрабатывает запросы GET, POST и DELETE с учетом прав доступа.
+    """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdmin | ReadOnly,)
@@ -46,6 +50,10 @@ class CategoryViewSet(CreateListDestroyMixin):
 
 
 class GenreViewSet(CreateListDestroyMixin):
+    """
+    Представление модели Genre.
+    Обрабатывает запросы GET, POST и DELETE с учетом прав доступа.
+    """
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdmin | ReadOnly,)
@@ -55,6 +63,10 @@ class GenreViewSet(CreateListDestroyMixin):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """
+    Представление модели Title.
+    Обрабатывает все запросы с учетом прав доступа.
+    """
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')
     ).all()
@@ -70,6 +82,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """Представление модели Review."""
     serializer_class = ReviewSerializer
     permission_classes = (
         IsAuthorModeratorAdminOrReadOnly,
@@ -92,6 +105,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """Представление модели Comment."""
     serializer_class = CommentSerializer
     permission_classes = (
         IsAuthorModeratorAdminOrReadOnly,
@@ -116,6 +130,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class SignUpView(APIView):
+    """
+    Получить код подтверждения на переданный email. Права доступа: Доступно без
+    токена.
+    """
     def post(self, request):
         serializer = ConfirmationCodeSerializer(data=request.data)
         username = request.data.get('username')
@@ -126,12 +144,15 @@ class SignUpView(APIView):
         if serializer.is_valid():
             if user:
                 if user.get(username=username).email != email:
-                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    return Response(serializer.errors,
+                                    status=status.HTTP_400_BAD_REQUEST)
                 user.update(confirmation_code=code)
             else:
                 if UserYamDb.objects.filter(email=email):
-                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                UserYamDb.objects.create(username=username, email=email, confirmation_code=code)
+                    return Response(serializer.errors,
+                                    status=status.HTTP_400_BAD_REQUEST)
+                UserYamDb.objects.create(username=username,
+                                         email=email, confirmation_code=code)
             send_mail(
                 subject='Ваш код для входа в систему',
                 message=f'{code}',
@@ -144,6 +165,9 @@ class SignUpView(APIView):
 
 
 class VerifyCodeView(APIView):
+    """
+    Получение JWT-токена в обмен на username и confirmation code.
+    """
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
         username = request.data.get('username')
@@ -152,16 +176,23 @@ class VerifyCodeView(APIView):
 
         if serializer.is_valid():
             if confirmation_user:
-                if confirmation_code == confirmation_user.get(username=username).confirmation_code:
+                if confirmation_code == confirmation_user.get(
+                    username=username
+                ).confirmation_code:
                     refresh = RefreshToken.for_user(confirmation_user)
                     custom_response = {"token": str(refresh)}
                     return Response(custom_response, status=status.HTTP_200_OK)
             else:
-                return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+                return Response(serializer.errors,
+                                status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """
+    Получение списка всех пользователей.
+    Права доступа: Администратор.
+    """
     queryset = UserYamDb.objects.all()
     serializer_class = UserYamDbSerializer
     permission_classes = (IsAdmin,)
@@ -188,6 +219,6 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     def perform_update(self, serializer):
         serializer.save(role=self.request.user.role, partial=True)

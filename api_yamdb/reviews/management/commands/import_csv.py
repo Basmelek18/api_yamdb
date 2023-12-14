@@ -39,7 +39,8 @@ class Command(BaseCommand):
             reader = csv.DictReader(csvfile)
             for row in reader:
                 GenreTitle.objects.create(
-                    id=row['id'], title_id=row['title_id'], genre_id=row['genre_id']
+                    id=row['id'], title_id=row['title_id'],
+                    genre_id=row['genre_id']
                 )
 
     def import_review(self):
@@ -65,6 +66,7 @@ class Command(BaseCommand):
                     year=row['year'],
                     category=row['category']
                 )
+
     def import_users(self):
         with open('static/data/users.csv') as csvfile:
             reader = csv.DictReader(csvfile)
@@ -88,4 +90,3 @@ class Command(BaseCommand):
         self.import_titles()
         self.import_users()
         self.stdout.write(self.style.SUCCESS('Data imported successfully'))
-

@@ -1,6 +1,6 @@
 from django.core.validators import RegexValidator, EmailValidator
-from rest_framework import serializers, validators
-from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -8,18 +8,24 @@ from users.models import UserYamDb
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Category."""
     class Meta:
         exclude = ('id',)
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Genre."""
     class Meta:
         exclude = ('id',)
         model = Genre
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для модели Title.
+    Только для операций чтения.
+    """
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
     rating = serializers.IntegerField()
@@ -30,6 +36,10 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для модели Title.
+    Только для операций записи.
+    """
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
         slug_field='slug',
@@ -46,6 +56,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Review."""
     title = serializers.SlugRelatedField(
         slug_field='name',
         read_only=True
@@ -60,6 +71,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'text', 'author', 'score', 'pub_date',)
 
     def validate(self, data):
+        """
+        Проверяет не писал ли уже автор POST запроса
+        отзыв на это произведение раньше.
+        """
         title_id = self.context['view'].kwargs.get('title_id')
         request = self.context['request']
         title = get_object_or_404(Title, id=title_id)
@@ -74,6 +89,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Comment."""
     review = serializers.SlugRelatedField(
         slug_field='text',
         read_only=True
@@ -89,12 +105,14 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class ConfirmationCodeSerializer(serializers.ModelSerializer):
+    """Сериализатор для регистрации и отправки кода на email."""
     username = serializers.CharField(
         max_length=150,
         validators=[
             RegexValidator(
                 regex=r'^[\w.@+-]+$',
-                message='Field should contain only letters, digits, and @/./+/-/_ characters.',
+                message=('Field should contain only letters, '
+                         'digits, and @/./+/-/_ characters.'),
                 code='invalid_characters',
             ),
         ],
@@ -120,14 +138,15 @@ class ConfirmationCodeSerializer(serializers.ModelSerializer):
         fields = ('email', 'username',)
 
 
-
 class TokenSerializer(serializers.ModelSerializer):
+    """Сериализатор для работы с токеном JWT."""
     username = serializers.CharField(
         max_length=150,
         validators=[
             RegexValidator(
                 regex=r'^[\w.@+-]+$',
-                message='Field should contain only letters, digits, and @/./+/-/_ characters.',
+                message=('Field should contain only letters, '
+                         'digits, and @/./+/-/_ characters.'),
                 code='invalid_characters',
             ),
         ],
@@ -143,12 +162,14 @@ class TokenSerializer(serializers.ModelSerializer):
 
 
 class UserYamDbSerializer(serializers.ModelSerializer):
+    """Сериализатор для работы с моделью user."""
     username = serializers.CharField(
         max_length=150,
         validators=[
             RegexValidator(
                 regex=r'^[\w.@+-]+$',
-                message='Field should contain only letters, digits, and @/./+/-/_ characters.',
+                message=('Field should contain only letters, '
+                         'digits, and @/./+/-/_ characters.'),
                 code='invalid_characters',
             ),
             UniqueValidator(

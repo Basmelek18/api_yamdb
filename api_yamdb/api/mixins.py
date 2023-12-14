@@ -7,4 +7,5 @@ class CreateListDestroyMixin(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
+    """Кастомный миксин для Create, List, Delete операций"""
     pass
