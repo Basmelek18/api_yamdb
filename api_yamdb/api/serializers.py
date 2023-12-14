@@ -162,7 +162,7 @@ class TokenSerializer(serializers.ModelSerializer):
 
 
 class AdminUserYamDbSerializer(serializers.ModelSerializer):
-  """Сериализатор для работы с моделью user."""
+    """Сериализатор для работы с моделью user."""
     username = serializers.CharField(
         max_length=150,
         validators=[
