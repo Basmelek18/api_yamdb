@@ -148,14 +148,16 @@ class VerifyCodeView(APIView):
         serializer = TokenSerializer(data=request.data)
         username = request.data.get('username')
         confirmation_code = request.data.get('confirmation_code')
-        confirmation_user = get_object_or_404(UserYamDb, username=username)
-
-        refresh = RefreshToken.for_user(confirmation_user)
-        custom_response = {"token": str(refresh)}
+        confirmation_user = UserYamDb.objects.filter(username=username)
 
         if serializer.is_valid():
-            if confirmation_code == confirmation_user.confirmation_code:
-                return Response(custom_response, status=status.HTTP_200_OK)
+            if confirmation_user:
+                if confirmation_code == confirmation_user.get(username=username).confirmation_code:
+                    refresh = RefreshToken.for_user(confirmation_user)
+                    custom_response = {"token": str(refresh)}
+                    return Response(custom_response, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
