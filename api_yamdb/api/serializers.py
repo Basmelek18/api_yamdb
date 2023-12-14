@@ -161,8 +161,8 @@ class TokenSerializer(serializers.ModelSerializer):
         )
 
 
-class UserYamDbSerializer(serializers.ModelSerializer):
-    """Сериализатор для работы с моделью user."""
+class AdminUserYamDbSerializer(serializers.ModelSerializer):
+  """Сериализатор для работы с моделью user."""
     username = serializers.CharField(
         max_length=150,
         validators=[
@@ -187,9 +187,6 @@ class UserYamDbSerializer(serializers.ModelSerializer):
             )
         ]
     )
-    # first_name = serializers.CharField(max_length=150, )
-    # last_name = serializers.CharField(max_length=150, )
-    role = serializers.StringRelatedField()
 
     class Meta:
         model = UserYamDb
@@ -201,3 +198,7 @@ class UserYamDbSerializer(serializers.ModelSerializer):
             'bio',
             'role',
         )
+
+
+class UserYamDbSerializer(AdminUserYamDbSerializer):
+    role = serializers.StringRelatedField()
