@@ -1,6 +1,7 @@
 from django.core.validators import RegexValidator, EmailValidator
 from rest_framework import serializers, validators
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import UserYamDb
@@ -56,17 +57,19 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ('id', 'title', 'text', 'author', 'score', 'pub_date',)
-        # validators = [
-        #     validators.UniqueTogetherValidator(
-        #         queryset=Review.objects.all(),
-        #         fields=('title', 'author'),
-        #         message=(
-        #             'Валидация на уникальность данных не пройдена: '
-        #             f'запись с полями {fields} уже существует. Пользователь '
-        #             'может оставить только один отзыв на произведение!'
-        #         )
-        #     )
-        # ]
+
+    def validate(self, data):
+        title_id = self.context['view'].kwargs.get('title_id')
+        request = self.context['request']
+        title = get_object_or_404(Title, id=title_id)
+        if request.method == 'POST':
+            if Review.objects.filter(
+                author=request.user, title=title
+            ).exists():
+                raise serializers.ValidationError(
+                    'Можно оставить только один отзыв!'
+                )
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
