@@ -44,9 +44,9 @@ class UserYamDb(AbstractUser):
     @property
     def is_admin(self):
         return self.role == (
-                UserRole.ADMIN.value
-                or self.is_superuser
-                or self.is_staff
+            UserRole.ADMIN.value
+            or self.is_superuser
+            or self.is_staff
         )
 
     @property
