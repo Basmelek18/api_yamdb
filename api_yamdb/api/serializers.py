@@ -142,6 +142,43 @@ class TokenSerializer(serializers.ModelSerializer):
         )
 
 
+class AdminUserYamDbSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        max_length=150,
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message='Field should contain only letters, digits, and @/./+/-/_ characters.',
+                code='invalid_characters',
+            ),
+            UniqueValidator(
+                queryset=UserYamDb.objects.all(),
+                message='Пользователь с таким username уже существует',
+            )
+        ],
+    )
+    email = serializers.EmailField(
+        max_length=254,
+        validators=[
+            UniqueValidator(
+                queryset=UserYamDb.objects.all(),
+                message='Пользователь с таким email уже существует',
+            )
+        ]
+    )
+
+    class Meta:
+        model = UserYamDb
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )
+
+
 class UserYamDbSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         max_length=150,
@@ -166,8 +203,6 @@ class UserYamDbSerializer(serializers.ModelSerializer):
             )
         ]
     )
-    # first_name = serializers.CharField(max_length=150, )
-    # last_name = serializers.CharField(max_length=150, )
     role = serializers.StringRelatedField()
 
     class Meta:
