@@ -121,10 +121,13 @@ class SignUpView(APIView):
         username = request.data.get('username')
         email = request.data.get('email')
         code = ''.join(random.choice('0123456789') for _ in range(6))
+        user = UserYamDb.objects.filter(username=username)
 
         if serializer.is_valid():
-            if UserYamDb.objects.filter(username=username):
-                UserYamDb.objects.filter(username=username).update(confirmation_code=code)
+            if user:
+                if user.get(username=username).email != email:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                user.update(confirmation_code=code)
             else:
                 if UserYamDb.objects.filter(email=email):
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
