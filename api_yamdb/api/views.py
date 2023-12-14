@@ -1,10 +1,9 @@
-from django_filters.rest_framework import DjangoFilterBackend
 import random
 
+from django_filters.rest_framework import DjangoFilterBackend
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
@@ -20,7 +19,6 @@ from .permissions import (
     ReadOnly,
 )
 from reviews.models import Category, Title, Review, Genre
-
 from .serializers import (
     CommentSerializer,
     ReviewSerializer,
