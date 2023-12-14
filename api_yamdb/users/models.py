@@ -61,4 +61,3 @@ class UserYamDb(AbstractUser):
         verbose_name = ''
         verbose_name_plural = ''
         ordering = ('last_name', 'first_name')
-
