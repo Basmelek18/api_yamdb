@@ -6,7 +6,7 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework import viewsets, status
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
@@ -61,6 +61,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdmin | ReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilters
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -73,6 +74,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (
         IsAuthorModeratorAdminOrReadOnly,
     )
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_queryset(self):
         title = get_object_or_404(
@@ -94,6 +96,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (
         IsAuthorModeratorAdminOrReadOnly,
     )
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_queryset(self):
         review = get_object_or_404(
@@ -153,20 +156,6 @@ class VerifyCodeView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserMeView(APIView):
-    def get(self, request):
-        users = UserYamDb.objects.all()
-        serializer = UserYamDbSerializer(users, many=True)
-        return Response(serializer.data)
-
-    def patch(self, request):
-        serializer = UserYamDbSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class UserViewSet(viewsets.ModelViewSet):
     queryset = UserYamDb.objects.all()
     serializer_class = UserYamDbSerializer
@@ -193,3 +182,6 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def perform_update(self, serializer):
+        serializer.save(role=self.request.user.role, partial=True)
