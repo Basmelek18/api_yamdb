@@ -166,7 +166,9 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = UserYamDb.objects.all()
     serializer_class = UserYamDbSerializer
     permission_classes = (IsAdmin,)
+    filter_backends = (SearchFilter,)
     search_fields = ('username',)
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     @action(
         methods=['GET', 'PATCH'],
