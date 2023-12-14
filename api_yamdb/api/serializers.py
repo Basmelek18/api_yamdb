@@ -93,10 +93,6 @@ class ConfirmationCodeSerializer(serializers.ModelSerializer):
                 message='Field should contain only letters, digits, and @/./+/-/_ characters.',
                 code='invalid_characters',
             ),
-            UniqueValidator(
-                queryset=UserYamDb.objects.all(),
-                message='Пользователь с таким username уже существует',
-            ),
         ],
     )
     email = serializers.EmailField(
@@ -104,10 +100,6 @@ class ConfirmationCodeSerializer(serializers.ModelSerializer):
         validators=[
             EmailValidator(
                 message='Enter a valid email address.'
-            ),
-            UniqueValidator(
-                queryset=UserYamDb.objects.all(),
-                message='Пользователь с таким username уже существует',
             ),
         ]
     )
@@ -122,12 +114,7 @@ class ConfirmationCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserYamDb
         fields = ('email', 'username',)
-        validators = [
-            UniqueTogetherValidator(
-                queryset=UserYamDb.objects.all(),
-                fields=('email', 'username',),
-            )
-        ]
+
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -176,9 +163,3 @@ class UserYamDbSerializer(serializers.ModelSerializer):
             'bio',
             'role',
         )
-        validators = [
-            UniqueTogetherValidator(
-                queryset=UserYamDb.objects.all(),
-                fields=('username', 'email'),
-            )
-        ]
