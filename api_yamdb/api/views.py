@@ -29,7 +29,8 @@ from .serializers import (
     UserYamDbSerializer,
     ConfirmationCodeSerializer,
     TokenSerializer,
-    AdminUserYamDbSerializer
+    AdminUserYamDbSerializer,
+    AdminUserYamDbPatchSerializer
 )
 from .mixins import CreateListDestroyMixin
 from users.models import UserYamDb
@@ -207,7 +208,6 @@ class UserViewSet(viewsets.ModelViewSet):
     Права доступа: Администратор.
     """
     queryset = UserYamDb.objects.all()
-    serializer_class = AdminUserYamDbSerializer
     permission_classes = (IsAdmin,)
     filter_backends = (SearchFilter,)
     search_fields = ('username',)
@@ -235,3 +235,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(role=self.request.user.role, partial=True)
+
+    def get_serializer_class(self):
+        if self.request.method == 'PATCH':
+            return AdminUserYamDbPatchSerializer
+        return AdminUserYamDbSerializer

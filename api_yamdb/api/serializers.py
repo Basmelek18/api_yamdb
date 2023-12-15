@@ -199,6 +199,31 @@ class AdminUserYamDbSerializer(serializers.ModelSerializer):
             'role',
         )
 
+    def validate_username(self, value):
+        if 'me' == value:
+            raise serializers.ValidationError(
+                "Вы не можете создать пользователя с именем me"
+            )
+        return value
+
+
+class AdminUserYamDbPatchSerializer(AdminUserYamDbSerializer):
+    """Сериализатор для работы с patch user."""
+    username = serializers.CharField(
+        max_length=150,
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message=('Field should contain only letters, '
+                         'digits, and @/./+/-/_ characters.'),
+                code='invalid_characters',
+            ),
+        ],
+    )
+    email = serializers.EmailField(
+        max_length=254,
+    )
+
 
 class UserYamDbSerializer(AdminUserYamDbSerializer):
     role = serializers.StringRelatedField()
