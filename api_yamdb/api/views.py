@@ -171,13 +171,12 @@ class VerifyCodeView(APIView):
         serializer = TokenSerializer(data=request.data)
         username = request.data.get('username')
         confirmation_code = request.data.get('confirmation_code')
-        confirmation_user = UserYamDb.objects.filter(username=username)
-
+        confirmation_user = UserYamDb.objects.filter(username=username).get(
+            username=username
+        )
         if serializer.is_valid():
             if confirmation_user:
-                if confirmation_code == confirmation_user.get(
-                    username=username
-                ).confirmation_code:
+                if confirmation_code == confirmation_user.confirmation_code:
                     refresh = RefreshToken.for_user(confirmation_user)
                     custom_response = {"token": str(refresh)}
                     return Response(custom_response, status=status.HTTP_200_OK)
