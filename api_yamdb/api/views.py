@@ -10,7 +10,7 @@ from rest_framework import viewsets, status
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 from .filter import TitleFilters
 from .permissions import (
@@ -138,18 +138,29 @@ class SignUpView(APIView):
         username = request.data.get('username')
         email = request.data.get('email')
         code = ''.join(random.choice('0123456789') for _ in range(6))
-        user = UserYamDb.objects.filter(username=username)
+        user = UserYamDb.objects.all()
 
         if serializer.is_valid():
-            if user:
+            if user.filter(username=username):
                 if user.get(username=username).email != email:
-                    return Response(serializer.errors,
-                                    status=status.HTTP_400_BAD_REQUEST)
+                    return Response(
+                        {'username': ['Поле email не совпадает с пользователем']},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                if user.get(email=email).username != username:
+                    return Response(
+                        {
+                            'username': ['Поле email не совпадает с пользователем'],
+                            'email': ['данный пользователь не существует'],
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
                 user.update(confirmation_code=code)
             else:
                 if UserYamDb.objects.filter(email=email):
-                    return Response(serializer.errors,
-                                    status=status.HTTP_400_BAD_REQUEST)
+                    return Response(
+                        {'email': ['данный пользователь не существует']},
+                        status=status.HTTP_400_BAD_REQUEST)
                 UserYamDb.objects.create(username=username,
                                          email=email, confirmation_code=code)
             send_mail(
@@ -179,10 +190,10 @@ class VerifyCodeView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         if str(data.get('confirmation_code')) == user.confirmation_code:
-            token = RefreshToken.for_user(user)
+            token = AccessToken.for_user(user)
             return Response(
                 {'token': str(token)},
-                status=status.HTTP_201_CREATED
+                status=status.HTTP_200_OK
             )
         return Response(
             {'confirmation_code': 'Неверный код подтверждения'},
