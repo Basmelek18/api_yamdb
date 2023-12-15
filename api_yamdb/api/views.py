@@ -184,11 +184,10 @@ class VerifyCodeView(APIView):
                 {'token': str(token)},
                 status=status.HTTP_201_CREATED
             )
-        else:
-            return Response(
-                {'confirmation_code': 'Неверный код подтверждения'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        return Response(
+            {'confirmation_code': 'Неверный код подтверждения'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class UserViewSet(viewsets.ModelViewSet):
