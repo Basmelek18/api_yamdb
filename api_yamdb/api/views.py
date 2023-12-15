@@ -155,7 +155,7 @@ class SignUpView(APIView):
                         },
                         status=status.HTTP_400_BAD_REQUEST
                     )
-                user.update(confirmation_code=code)
+                user.filter(username=username).update(confirmation_code=code)
             else:
                 if UserYamDb.objects.filter(email=email):
                     return Response(
