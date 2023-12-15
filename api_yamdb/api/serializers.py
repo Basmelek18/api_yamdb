@@ -200,5 +200,21 @@ class AdminUserYamDbSerializer(serializers.ModelSerializer):
         )
 
 
+class AdminUserYamDbPatchSerializer(AdminUserYamDbSerializer):
+    """Сериализатор для работы с моделью user."""
+    username = serializers.CharField(
+        max_length=150,
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message=('Field should contain only letters, '
+                         'digits, and @/./+/-/_ characters.'),
+                code='invalid_characters',
+            ),
+        ],
+    )
+    email = serializers.EmailField(max_length=254, )
+
+
 class UserYamDbSerializer(AdminUserYamDbSerializer):
     role = serializers.StringRelatedField()
