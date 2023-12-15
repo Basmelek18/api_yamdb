@@ -169,21 +169,25 @@ class VerifyCodeView(APIView):
     """
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
-        username = request.data.get('username')
-        confirmation_code = request.data.get('confirmation_code')
-        confirmation_user = UserYamDb.objects.filter(username=username).get(
-            username=username
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        try:
+            user = UserYamDb.objects.get(username=data['username'])
+        except UserYamDb.DoesNotExist:
+            return Response(
+                {'username': 'Пользователь не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        if data.get('confirmation_code') == user.confirmation_code:
+            token = RefreshToken.for_user(user).access_token
+            return Response(
+                {'token': str(token)},
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            {'confirmation_code': 'Неверный код подтверждения'},
+            status=status.HTTP_400_BAD_REQUEST
         )
-        if serializer.is_valid():
-            if confirmation_user:
-                if confirmation_code == confirmation_user.confirmation_code:
-                    refresh = RefreshToken.for_user(confirmation_user)
-                    custom_response = {"token": str(refresh)}
-                    return Response(custom_response, status=status.HTTP_200_OK)
-            else:
-                return Response(serializer.errors,
-                                status=status.HTTP_404_NOT_FOUND)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):
