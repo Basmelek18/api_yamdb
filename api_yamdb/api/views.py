@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework import viewsets, status
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
@@ -109,6 +109,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (
         IsAuthorModeratorAdminOrReadOnly,
+        IsAuthenticatedOrReadOnly
     )
     http_method_names = ('get', 'post', 'patch', 'delete')
 
@@ -127,6 +128,15 @@ class CommentViewSet(viewsets.ModelViewSet):
             title=self.kwargs['title_id']
         )
         serializer.save(author=self.request.user, review=review)
+
+    def perform_update(self, serializer):
+        review = get_object_or_404(
+            Review,
+            pk=self.kwargs['review_id'],
+            title=self.kwargs['title_id']
+        )
+        serializer.save(author=self.request.user, review=review, role=self.request.user.role, partial=True)
+        # serializer.save(role=self.request.user.role, partial=True)
 
 
 class SignUpView(APIView):
