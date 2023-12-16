@@ -5,12 +5,12 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework import viewsets, status
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 from .filter import TitleFilters
 from .permissions import (
@@ -29,7 +29,8 @@ from .serializers import (
     UserYamDbSerializer,
     ConfirmationCodeSerializer,
     TokenSerializer,
-    AdminUserYamDbSerializer
+    AdminUserYamDbSerializer,
+    AdminUserYamDbPatchSerializer
 )
 from .mixins import CreateListDestroyMixin
 from users.models import UserYamDb
@@ -66,9 +67,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     Представление модели Title.
     Обрабатывает все запросы с учетом прав доступа.
     """
-    queryset = Title.objects.annotate(
-        rating=Avg('reviews__score')
-    ).all()
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     permission_classes = (IsAdmin | ReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilters
@@ -108,6 +107,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (
         IsAuthorModeratorAdminOrReadOnly,
+        IsAuthenticatedOrReadOnly
     )
     http_method_names = ('get', 'post', 'patch', 'delete')
 
@@ -127,6 +127,15 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
         serializer.save(author=self.request.user, review=review)
 
+    def perform_update(self, serializer):
+        review = get_object_or_404(
+            Review,
+            pk=self.kwargs['review_id'],
+            title=self.kwargs['title_id']
+        )
+        serializer.save(author=self.request.user, review=review, role=self.request.user.role, partial=True)
+        # serializer.save(role=self.request.user.role, partial=True)
+
 
 class SignUpView(APIView):
     """
@@ -137,19 +146,22 @@ class SignUpView(APIView):
         serializer = ConfirmationCodeSerializer(data=request.data)
         username = request.data.get('username')
         email = request.data.get('email')
-        code = ''.join(random.choice('0123456789') for _ in range(6))
-        user = UserYamDb.objects.filter(username=username)
+        code = ''.join(random.choice('123456789') for _ in range(6))
+        user = UserYamDb.objects.all()
 
         if serializer.is_valid():
-            if user:
+            if user.filter(username=username):
                 if user.get(username=username).email != email:
-                    return Response(serializer.errors,
-                                    status=status.HTTP_400_BAD_REQUEST)
-                user.update(confirmation_code=code)
+                    return Response(
+                        {'username': ['Поле email не совпадает с пользователем']},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                user.filter(username=username).update(confirmation_code=code)
             else:
                 if UserYamDb.objects.filter(email=email):
-                    return Response(serializer.errors,
-                                    status=status.HTTP_400_BAD_REQUEST)
+                    return Response(
+                        {'email': ['данный пользователь не существует']},
+                        status=status.HTTP_400_BAD_REQUEST)
                 UserYamDb.objects.create(username=username,
                                          email=email, confirmation_code=code)
             send_mail(
@@ -169,22 +181,25 @@ class VerifyCodeView(APIView):
     """
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
-        username = request.data.get('username')
-        confirmation_code = request.data.get('confirmation_code')
-        confirmation_user = UserYamDb.objects.filter(username=username)
-
-        if serializer.is_valid():
-            if confirmation_user:
-                if confirmation_code == confirmation_user.get(
-                    username=username
-                ).confirmation_code:
-                    refresh = RefreshToken.for_user(confirmation_user)
-                    custom_response = {"token": str(refresh)}
-                    return Response(custom_response, status=status.HTTP_200_OK)
-            else:
-                return Response(serializer.errors,
-                                status=status.HTTP_404_NOT_FOUND)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        try:
+            user = UserYamDb.objects.get(username=data['username'])
+        except UserYamDb.DoesNotExist:
+            return Response(
+                {'username': 'Пользователь не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        if str(data.get('confirmation_code')) == user.confirmation_code:
+            token = AccessToken.for_user(user)
+            return Response(
+                {'token': str(token)},
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            {'confirmation_code': 'Неверный код подтверждения'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -193,7 +208,6 @@ class UserViewSet(viewsets.ModelViewSet):
     Права доступа: Администратор.
     """
     queryset = UserYamDb.objects.all()
-    serializer_class = AdminUserYamDbSerializer
     permission_classes = (IsAdmin,)
     filter_backends = (SearchFilter,)
     search_fields = ('username',)
@@ -221,3 +235,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(role=self.request.user.role, partial=True)
+
+    def get_serializer_class(self):
+        if self.request.method == 'PATCH':
+            return AdminUserYamDbPatchSerializer
+        return AdminUserYamDbSerializer
