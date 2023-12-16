@@ -67,7 +67,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     Представление модели Title.
     Обрабатывает все запросы с учетом прав доступа.
     """
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     permission_classes = (IsAdmin | ReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilters
