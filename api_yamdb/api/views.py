@@ -5,12 +5,15 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly
+)
 from rest_framework import viewsets, status
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.tokens import AccessToken
 
 from .filter import TitleFilters
 from .permissions import (
@@ -133,8 +136,12 @@ class CommentViewSet(viewsets.ModelViewSet):
             pk=self.kwargs['review_id'],
             title=self.kwargs['title_id']
         )
-        serializer.save(author=self.request.user, review=review, role=self.request.user.role, partial=True)
-        # serializer.save(role=self.request.user.role, partial=True)
+        serializer.save(
+            author=self.request.user,
+            review=review,
+            role=self.request.user.role,
+            partial=True
+        )
 
 
 class SignUpView(APIView):
@@ -153,7 +160,7 @@ class SignUpView(APIView):
             if user.filter(username=username):
                 if user.get(username=username).email != email:
                     return Response(
-                        {'username': ['Поле email не совпадает с пользователем']},
+                        {'username': ['Поле email не совпадает с username']},
                         status=status.HTTP_400_BAD_REQUEST
                     )
                 user.filter(username=username).update(confirmation_code=code)
