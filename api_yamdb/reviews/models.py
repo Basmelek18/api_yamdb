@@ -60,6 +60,11 @@ class Title(models.Model):
         blank=True,
         max_length=256,
     )
+    rating = models.IntegerField(
+        verbose_name='Рейтинг',
+        blank=True,
+        null=True,
+    )
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',

@@ -67,9 +67,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     Представление модели Title.
     Обрабатывает все запросы с учетом прав доступа.
     """
-    queryset = Title.objects.annotate(
-        rating=Avg('reviews__score')
-    ).all()
+    queryset = Title.objects.all()
     permission_classes = (IsAdmin | ReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilters
@@ -148,7 +146,7 @@ class SignUpView(APIView):
         serializer = ConfirmationCodeSerializer(data=request.data)
         username = request.data.get('username')
         email = request.data.get('email')
-        code = ''.join(random.choice('0123456789') for _ in range(6))
+        code = ''.join(random.choice('123456789') for _ in range(6))
         user = UserYamDb.objects.all()
 
         if serializer.is_valid():
