@@ -19,7 +19,7 @@ from .filter import TitleFilters
 from .permissions import (
     IsAuthorModeratorAdminOrReadOnly,
     IsAdmin,
-    ReadOnly,
+    IsAdminOrReadOnly,
 )
 from reviews.models import Category, Title, Review, Genre
 from .serializers import (
@@ -45,7 +45,7 @@ class CategoryViewSet(CreateListDestroyMixin):
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdmin | ReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -58,7 +58,7 @@ class GenreViewSet(CreateListDestroyMixin):
     """
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdmin | ReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -70,7 +70,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     Обрабатывает все запросы с учетом прав доступа.
     """
     queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
-    permission_classes = (IsAdmin | ReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilters
     http_method_names = ('get', 'post', 'patch', 'delete')
