@@ -147,7 +147,7 @@ class SignUpView(APIView):
                     {
                         'username': ['Поле username не совпадает с email'],
                         'email': ['Поле email не совпадает с username']
-                     },
+                    },
                     status=status.HTTP_400_BAD_REQUEST
                 )
             user, created = user.get_or_create(username=username, email=email)
