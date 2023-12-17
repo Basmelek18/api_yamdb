@@ -3,13 +3,13 @@ from rest_framework.routers import DefaultRouter
 
 from api.v1.views import (
     CategoryViewSet,
-    ReviewViewSet,
     CommentViewSet,
-    SignUpView,
-    VerifyCodeView,
-    TitleViewSet,
     GenreViewSet,
+    ReviewViewSet,
+    SignUpView,
+    TitleViewSet,
     UserViewSet,
+    VerifyCodeView,
 )
 
 
