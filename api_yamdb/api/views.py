@@ -103,34 +103,18 @@ class CommentViewSet(viewsets.ModelViewSet):
     )
     http_method_names = ('get', 'post', 'patch', 'delete')
 
-    def get_queryset(self):
-        review = get_object_or_404(
+    def get_review(self):
+        return get_object_or_404(
             Review,
             pk=self.kwargs['review_id'],
             title=self.kwargs['title_id']
         )
-        return review.comments.all()
+
+    def get_queryset(self):
+        return self.get_review().comments.all()
 
     def perform_create(self, serializer):
-        review = get_object_or_404(
-            Review,
-            pk=self.kwargs['review_id'],
-            title=self.kwargs['title_id']
-        )
-        serializer.save(author=self.request.user, review=review)
-
-    def perform_update(self, serializer):
-        review = get_object_or_404(
-            Review,
-            pk=self.kwargs['review_id'],
-            title=self.kwargs['title_id']
-        )
-        serializer.save(
-            author=self.request.user,
-            review=review,
-            role=self.request.user.role,
-            partial=True
-        )
+        serializer.save(author=self.request.user, review=self.get_review())
 
 
 class SignUpView(APIView):
