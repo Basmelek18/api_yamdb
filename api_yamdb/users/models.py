@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from .enums import UserRole
+from api_yamdb.settings import MAX_LENGTH_USERNAME
 
 
 class UserYamDb(AbstractUser):
@@ -9,25 +9,19 @@ class UserYamDb(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('first_name', 'last_name', 'username')
 
+    class UserRole(models.TextChoices):
+        ADMIN = 'admin'
+        USER = 'user'
+        MODERATOR = 'moderator'
+
     email = models.EmailField(
         verbose_name='Электронная почта',
         unique=True,
-        max_length=254
     )
     username = models.CharField(
         verbose_name='Имя пользователя',
         unique=True,
-        max_length=150
-    )
-    first_name = models.CharField(
-        verbose_name='Имя',
-        max_length=150,
-        blank=True
-    )
-    last_name = models.CharField(
-        verbose_name='Фамилия',
-        max_length=150,
-        blank=True
+        max_length=MAX_LENGTH_USERNAME
     )
     bio = models.TextField(
         verbose_name='Биография',
@@ -41,23 +35,23 @@ class UserYamDb(AbstractUser):
     )
     confirmation_code = models.CharField(max_length=6)
 
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('last_name', 'first_name')
+
     @property
     def is_admin(self):
         return self.role == (
-            UserRole.ADMIN.value
+            self.UserRole.ADMIN.value
             or self.is_superuser
             or self.is_staff
         )
 
     @property
     def is_moderator(self):
-        return self.role == UserRole.MODERATOR.value
+        return self.role == self.UserRole.MODERATOR.value
 
     @property
     def is_user(self):
-        return self.role == UserRole.USER.value
-
-    class Meta:
-        verbose_name = ''
-        verbose_name_plural = ''
-        ordering = ('last_name', 'first_name')
+        return self.role == self.UserRole.USER.value
