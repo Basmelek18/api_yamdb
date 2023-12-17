@@ -1,41 +1,40 @@
-import random
-
-from django_filters.rest_framework import DjangoFilterBackend
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly
 )
-from rest_framework import viewsets, status
+from rest_framework import status, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .filter import TitleFilters
-from .permissions import (
-    IsAuthorModeratorAdminOrReadOnly,
+from api.v1.filter import TitleFilters
+from api.v1.mixins import CreateListDestroyMixin
+from api.v1.permissions import (
     IsAdmin,
-    ReadOnly,
+    IsAdminOrReadOnly,
+    IsAuthorModeratorAdminOrReadOnly,
 )
-from reviews.models import Category, Title, Review, Genre
-from .serializers import (
+from api.v1.serializers import (
+    CategorySerializer,
     CommentSerializer,
+    ConfirmationCodeSerializer,
+    GenreSerializer,
     ReviewSerializer,
     TitleReadSerializer,
     TitleWriteSerializer,
-    CategorySerializer,
-    GenreSerializer,
-    UserYamDbSerializer,
-    ConfirmationCodeSerializer,
     TokenSerializer,
-    AdminUserYamDbSerializer,
-    AdminUserYamDbPatchSerializer
+    UpdateUserYamDbSerializer,
+    UserYamDbSerializer,
 )
-from .mixins import CreateListDestroyMixin
+from reviews.models import Category, Genre, Review, Title
 from users.models import UserYamDb
 
 
@@ -46,10 +45,6 @@ class CategoryViewSet(CreateListDestroyMixin):
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdmin | ReadOnly,)
-    filter_backends = (SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
 class GenreViewSet(CreateListDestroyMixin):
@@ -59,10 +54,6 @@ class GenreViewSet(CreateListDestroyMixin):
     """
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdmin | ReadOnly,)
-    filter_backends = (SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -71,7 +62,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     Обрабатывает все запросы с учетом прав доступа.
     """
     queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
-    permission_classes = (IsAdmin | ReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilters
     http_method_names = ('get', 'post', 'patch', 'delete')
@@ -90,19 +81,17 @@ class ReviewViewSet(viewsets.ModelViewSet):
     )
     http_method_names = ('get', 'post', 'patch', 'delete')
 
-    def get_queryset(self):
-        title = get_object_or_404(
+    def get_title(self):
+        return get_object_or_404(
             Title,
             pk=self.kwargs['title_id'],
         )
-        return title.reviews.all()
+
+    def get_queryset(self):
+        return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(
-            Title,
-            pk=self.kwargs['title_id'],
-        )
-        serializer.save(author=self.request.user, title=title)
+        serializer.save(author=self.request.user, title=self.get_title())
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -114,34 +103,18 @@ class CommentViewSet(viewsets.ModelViewSet):
     )
     http_method_names = ('get', 'post', 'patch', 'delete')
 
-    def get_queryset(self):
-        review = get_object_or_404(
+    def get_review(self):
+        return get_object_or_404(
             Review,
             pk=self.kwargs['review_id'],
             title=self.kwargs['title_id']
         )
-        return review.comments.all()
+
+    def get_queryset(self):
+        return self.get_review().comments.all()
 
     def perform_create(self, serializer):
-        review = get_object_or_404(
-            Review,
-            pk=self.kwargs['review_id'],
-            title=self.kwargs['title_id']
-        )
-        serializer.save(author=self.request.user, review=review)
-
-    def perform_update(self, serializer):
-        review = get_object_or_404(
-            Review,
-            pk=self.kwargs['review_id'],
-            title=self.kwargs['title_id']
-        )
-        serializer.save(
-            author=self.request.user,
-            review=review,
-            role=self.request.user.role,
-            partial=True
-        )
+        serializer.save(author=self.request.user, review=self.get_review())
 
 
 class SignUpView(APIView):
@@ -153,28 +126,35 @@ class SignUpView(APIView):
         serializer = ConfirmationCodeSerializer(data=request.data)
         username = request.data.get('username')
         email = request.data.get('email')
-        code = ''.join(random.choice('123456789') for _ in range(6))
         user = UserYamDb.objects.all()
-
-        if serializer.is_valid():
-            if user.filter(username=username):
-                if user.get(username=username).email != email:
+        if serializer.is_valid(raise_exception=True):
+            username_from_data = UserYamDb.objects.filter(username=username).first()
+            email_from_data = UserYamDb.objects.filter(email=email).first()
+            if email_from_data != username_from_data:
+                if username_from_data is None:
                     return Response(
-                        {'username': ['Поле email не совпадает с username']},
+                        {'email': ['Поле email не совпадает с username']},
                         status=status.HTTP_400_BAD_REQUEST
                     )
-                user.filter(username=username).update(confirmation_code=code)
-            else:
-                if UserYamDb.objects.filter(email=email):
+                elif email_from_data is None:
                     return Response(
-                        {'email': ['данный пользователь не существует']},
-                        status=status.HTTP_400_BAD_REQUEST)
-                UserYamDb.objects.create(username=username,
-                                         email=email, confirmation_code=code)
+                        {'username': ['Поле username не совпадает с email']},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                else:
+                    return Response(
+                        {
+                            'username': ['Поле username не совпадает с email'],
+                            'email': ['Поле email не совпадает с username']
+                         },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            user, created = user.get_or_create(username=username, email=email)
+            code = default_token_generator.make_token(user)
             send_mail(
                 subject='Ваш код для входа в систему',
-                message=f'{code}',
-                from_email='from@example.com',
+                message=code,
+                from_email=settings.FROM_EMAIL,
                 recipient_list=[f'{email}'],
                 fail_silently=True,
             )
@@ -190,22 +170,19 @@ class VerifyCodeView(APIView):
         serializer = TokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        try:
-            user = UserYamDb.objects.get(username=data['username'])
-        except UserYamDb.DoesNotExist:
+        user = get_object_or_404(UserYamDb, username=data['username'])
+        if not default_token_generator.check_token(
+                user,
+                data.get('confirmation_code')
+        ):
             return Response(
-                {'username': 'Пользователь не найден'},
-                status=status.HTTP_404_NOT_FOUND
+                {'confirmation_code': 'Неверный код подтверждения'},
+                status=status.HTTP_400_BAD_REQUEST
             )
-        if str(data.get('confirmation_code')) == user.confirmation_code:
-            token = AccessToken.for_user(user)
-            return Response(
-                {'token': str(token)},
-                status=status.HTTP_200_OK
-            )
+        token = AccessToken.for_user(user)
         return Response(
-            {'confirmation_code': 'Неверный код подтверждения'},
-            status=status.HTTP_400_BAD_REQUEST
+            {'token': str(token)},
+            status=status.HTTP_200_OK
         )
 
 
@@ -215,6 +192,7 @@ class UserViewSet(viewsets.ModelViewSet):
     Права доступа: Администратор.
     """
     queryset = UserYamDb.objects.all()
+    serializer_class = UserYamDbSerializer
     permission_classes = (IsAdmin,)
     filter_backends = (SearchFilter,)
     search_fields = ('username',)
@@ -229,9 +207,9 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def get_current_user_info(self, request):
         if request.method == 'GET':
-            serializer = UserYamDbSerializer(request.user)
+            serializer = UpdateUserYamDbSerializer(request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer = UserYamDbSerializer(
+        serializer = UpdateUserYamDbSerializer(
             request.user,
             data=request.data,
             partial=True,
@@ -239,11 +217,3 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def perform_update(self, serializer):
-        serializer.save(role=self.request.user.role, partial=True)
-
-    def get_serializer_class(self):
-        if self.request.method == 'PATCH':
-            return AdminUserYamDbPatchSerializer
-        return AdminUserYamDbSerializer

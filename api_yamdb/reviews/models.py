@@ -1,7 +1,8 @@
 from django.db import models
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.utils import timezone
 
+from reviews.validators import validate_year
 from users.models import UserYamDb
 
 
@@ -12,11 +13,10 @@ class BaseModel(models.Model):
     """
     name = models.CharField(
         verbose_name='Название',
-        max_length=256,
+        max_length=settings.LEN_TEXT,
     )
     slug = models.SlugField(
         verbose_name='Слаг',
-        max_length=50,
         unique=True,
     )
 
@@ -47,18 +47,15 @@ class Title(models.Model):
     """Модель произведений"""
     name = models.CharField(
         verbose_name='Название',
-        max_length=256,
+        max_length=settings.LEN_TEXT,
     )
-    year = models.PositiveSmallIntegerField(
+    year = models.SmallIntegerField(
         verbose_name='Год выпуска',
-        validators=[
-            MaxValueValidator(timezone.now().year)
-        ],
+        validators=[validate_year],
     )
-    description = models.CharField(
+    description = models.TextField(
         verbose_name='Описание',
         blank=True,
-        max_length=256,
     )
     genre = models.ManyToManyField(
         Genre,
@@ -109,8 +106,7 @@ class Review(models.Model):
         related_name='reviews',
         verbose_name='Произведение',
     )
-    text = models.CharField(
-        max_length=200,
+    text = models.TextField(
         verbose_name='Текст отзыва',
     )
     author = models.ForeignKey(
@@ -121,8 +117,14 @@ class Review(models.Model):
     )
     score = models.PositiveSmallIntegerField(
         validators=[
-            MinValueValidator(1),
-            MaxValueValidator(10)
+            MinValueValidator(
+                settings.SCORE_MIN,
+                message=f'Оценка не может быть ниже {settings.SCORE_MIN}'
+            ),
+            MaxValueValidator(
+                settings.SCORE_MAX,
+                message=f'Оценка не может быть выше {settings.SCORE_MAX}'
+            )
         ],
         verbose_name='Оценка',
     )
@@ -153,8 +155,7 @@ class Comment(models.Model):
         related_name='comments',
         verbose_name='Отзыв',
     )
-    text = models.CharField(
-        max_length=200,
+    text = models.TextField(
         verbose_name='Текст комментария',
     )
     author = models.ForeignKey(
