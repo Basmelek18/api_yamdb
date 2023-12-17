@@ -1,7 +1,6 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-from api_yamdb.settings import MAX_LENGTH_USERNAME
 
 
 class UserYamDb(AbstractUser):
@@ -21,7 +20,7 @@ class UserYamDb(AbstractUser):
     username = models.CharField(
         verbose_name='Имя пользователя',
         unique=True,
-        max_length=MAX_LENGTH_USERNAME
+        max_length=settings.MAX_LENGTH_USERNAME
     )
     bio = models.TextField(
         verbose_name='Биография',
