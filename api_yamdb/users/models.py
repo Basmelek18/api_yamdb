@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
-from api.validators import validate_username
+from api.v1.validators import validate_username
 
 
 class UserYamDb(AbstractUser):
