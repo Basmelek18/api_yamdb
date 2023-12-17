@@ -1,6 +1,9 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
+
+from api.validators import validate_username
 
 
 class UserYamDb(AbstractUser):
@@ -20,7 +23,11 @@ class UserYamDb(AbstractUser):
     username = models.CharField(
         verbose_name='Имя пользователя',
         unique=True,
-        max_length=settings.MAX_LENGTH_USERNAME
+        max_length=settings.MAX_LENGTH_USERNAME,
+        validators=[
+            UnicodeUsernameValidator(),
+            validate_username()
+        ],
     )
     bio = models.TextField(
         verbose_name='Биография',

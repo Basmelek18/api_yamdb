@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.validators import RegexValidator, EmailValidator
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -5,6 +7,7 @@ from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import UserYamDb
+from api.validators import validate_username
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -96,51 +99,29 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'pub_date',)
 
 
-class ConfirmationCodeSerializer(serializers.ModelSerializer):
+class ConfirmationCodeSerializer(serializers.Serializer):
     """Сериализатор для регистрации и отправки кода на email."""
     username = serializers.CharField(
-        max_length=150,
+        max_length=settings.MAX_LENGTH_USERNAME,
         validators=[
-            RegexValidator(
-                regex=r'^[\w.@+-]+$',
-                message=('Field should contain only letters, '
-                         'digits, and @/./+/-/_ characters.'),
-                code='invalid_characters',
-            ),
+            UnicodeUsernameValidator(),
+            validate_username()
         ],
     )
-    email = serializers.EmailField(
-        max_length=254,
-        validators=[
-            EmailValidator(
-                message='Enter a valid email address.'
-            ),
-        ]
-    )
-
-    def validate_username(self, value):
-        if 'me' == value:
-            raise serializers.ValidationError(
-                "Вы не можете создать пользователя с именем me"
-            )
-        return value
+    email = serializers.EmailField()
 
     class Meta:
         model = UserYamDb
         fields = ('email', 'username',)
 
 
-class TokenSerializer(serializers.ModelSerializer):
+class TokenSerializer(serializers.Serializer):
     """Сериализатор для работы с токеном JWT."""
     username = serializers.CharField(
-        max_length=150,
+        max_length=settings.MAX_LENGTH_USERNAME,
         validators=[
-            RegexValidator(
-                regex=r'^[\w.@+-]+$',
-                message=('Field should contain only letters, '
-                         'digits, and @/./+/-/_ characters.'),
-                code='invalid_characters',
-            ),
+            UnicodeUsernameValidator(),
+            validate_username()
         ],
     )
     confirmation_code = serializers.IntegerField()
@@ -153,32 +134,10 @@ class TokenSerializer(serializers.ModelSerializer):
         )
 
 
-class AdminUserYamDbSerializer(serializers.ModelSerializer):
+class UserYamDbSerializer(serializers.ModelSerializer):
     """Сериализатор для работы с моделью user."""
-    username = serializers.CharField(
-        max_length=150,
-        validators=[
-            RegexValidator(
-                regex=r'^[\w.@+-]+$',
-                message=('Field should contain only letters, '
-                         'digits, and @/./+/-/_ characters.'),
-                code='invalid_characters',
-            ),
-            UniqueValidator(
-                queryset=UserYamDb.objects.all(),
-                message='Пользователь с таким username уже существует',
-            )
-        ],
-    )
-    email = serializers.EmailField(
-        max_length=254,
-        validators=[
-            UniqueValidator(
-                queryset=UserYamDb.objects.all(),
-                message='Пользователь с таким email уже существует',
-            )
-        ]
-    )
+    username = serializers.CharField()
+    email = serializers.EmailField()
 
     class Meta:
         model = UserYamDb
@@ -192,21 +151,5 @@ class AdminUserYamDbSerializer(serializers.ModelSerializer):
         )
 
 
-class AdminUserYamDbPatchSerializer(AdminUserYamDbSerializer):
-    """Сериализатор для работы с моделью user."""
-    username = serializers.CharField(
-        max_length=150,
-        validators=[
-            RegexValidator(
-                regex=r'^[\w.@+-]+$',
-                message=('Field should contain only letters, '
-                         'digits, and @/./+/-/_ characters.'),
-                code='invalid_characters',
-            ),
-        ],
-    )
-    email = serializers.EmailField(max_length=254, )
-
-
-class UserYamDbSerializer(AdminUserYamDbSerializer):
-    role = serializers.StringRelatedField()
+class UpdateUserYamDbSerializer(UserYamDbSerializer):
+    role = serializers.CharField(read_only=True)
