@@ -86,16 +86,17 @@ class ReviewSerializer(serializers.ModelSerializer):
         Проверяет не писал ли уже автор POST запроса
         отзыв на это произведение раньше.
         """
-        title_id = self.context['view'].kwargs.get('title_id')
         request = self.context['request']
+        if request.method != 'POST':
+            return data
+        title_id = self.context['view'].kwargs.get('title_id')
         title = get_object_or_404(Title, id=title_id)
-        if request.method == 'POST':
-            if Review.objects.filter(
-                author=request.user, title=title
-            ).exists():
-                raise serializers.ValidationError(
-                    'Можно оставить только один отзыв!'
-                )
+        if Review.objects.filter(
+            author=request.user, title=title
+        ).exists():
+            raise serializers.ValidationError(
+                'Можно оставить только один отзыв!'
+            )
         return data
 
 
