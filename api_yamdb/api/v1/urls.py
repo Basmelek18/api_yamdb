@@ -15,7 +15,6 @@ from api.v1.views import (
 
 router_v1 = DefaultRouter()
 
-
 router_v1.register(
     'categories',
     CategoryViewSet,

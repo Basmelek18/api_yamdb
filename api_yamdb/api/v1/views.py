@@ -162,7 +162,10 @@ class VerifyCodeView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         user = get_object_or_404(UserYamDb, username=data['username'])
-        if not default_token_generator.check_token(user, str(data.get('confirmation_code'))):
+        if not default_token_generator.check_token(
+                user,
+                str(data.get('confirmation_code'))
+        ):
             return Response(
                 {'confirmation_code': 'Неверный код подтверждения'},
                 status=status.HTTP_400_BAD_REQUEST
