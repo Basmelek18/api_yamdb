@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from reviews.validators import validate_year
@@ -12,11 +13,10 @@ class BaseModel(models.Model):
     """
     name = models.CharField(
         verbose_name='Название',
-        max_length=256,
+        max_length=settings.LEN_TEXT,
     )
     slug = models.SlugField(
         verbose_name='Слаг',
-        max_length=50,
         unique=True,
     )
 
@@ -47,7 +47,7 @@ class Title(models.Model):
     """Модель произведений"""
     name = models.CharField(
         verbose_name='Название',
-        max_length=256,
+        max_length=settings.LEN_TEXT,
     )
     year = models.SmallIntegerField(
         verbose_name='Год выпуска',
