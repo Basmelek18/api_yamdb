@@ -30,7 +30,7 @@ class UserYamDb(AbstractUser):
     role = models.CharField(
         verbose_name='Роль',
         max_length=20,
-        choices=UserRole.choices(),
+        choices=UserRole.choices,
         default='user'
     )
     confirmation_code = models.CharField(max_length=6)
