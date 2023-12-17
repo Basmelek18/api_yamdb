@@ -127,19 +127,28 @@ class SignUpView(APIView):
         username = request.data.get('username')
         email = request.data.get('email')
         user = UserYamDb.objects.all()
-
         if serializer.is_valid(raise_exception=True):
-            if user.filter(username=username):
-                if user.get(username=username).email != email:
+            username_from_data = UserYamDb.objects.filter(username=username).first()
+            email_from_data = UserYamDb.objects.filter(email=email).first()
+            if email_from_data != username_from_data:
+                if username_from_data is None:
                     return Response(
-                        {'username': ['Поле email не совпадает с username']},
+                        {'email': ['Поле email не совпадает с username']},
                         status=status.HTTP_400_BAD_REQUEST
                     )
-            else:
-                if UserYamDb.objects.filter(email=email):
+                elif email_from_data is None:
                     return Response(
-                        {'email': ['данный пользователь не существует']},
-                        status=status.HTTP_400_BAD_REQUEST)
+                        {'username': ['Поле username не совпадает с email']},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                else:
+                    return Response(
+                        {
+                            'username': ['Поле username не совпадает с email'],
+                            'email': ['Поле email не совпадает с username']
+                         },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
             user, created = user.get_or_create(username=username, email=email)
             code = default_token_generator.make_token(user)
             send_mail(
