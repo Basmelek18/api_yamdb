@@ -106,8 +106,7 @@ class Review(models.Model):
         related_name='reviews',
         verbose_name='Произведение',
     )
-    text = models.CharField(
-        max_length=200,
+    text = models.TextField(
         verbose_name='Текст отзыва',
     )
     author = models.ForeignKey(
@@ -118,8 +117,14 @@ class Review(models.Model):
     )
     score = models.PositiveSmallIntegerField(
         validators=[
-            MinValueValidator(1),
-            MaxValueValidator(10)
+            MinValueValidator(
+                settings.SCORE_MIN,
+                message=f'Оценка не может быть ниже {settings.SCORE_MIN}'
+            ),
+            MaxValueValidator(
+                settings.SCORE_MAX,
+                message=f'Оценка не может быть ниже {settings.SCORE_MAX}'
+            )
         ],
         verbose_name='Оценка',
     )
@@ -150,8 +155,7 @@ class Comment(models.Model):
         related_name='comments',
         verbose_name='Отзыв',
     )
-    text = models.CharField(
-        max_length=200,
+    text = models.TextField(
         verbose_name='Текст комментария',
     )
     author = models.ForeignKey(
