@@ -7,7 +7,7 @@ from users.models import UserYamDb
 
 class Command(BaseCommand):
     def import_category(self):
-        with open('static/data/category.csv') as csvfile:
+        with open('static/data/category.csv', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 Category.objects.create(
@@ -15,19 +15,19 @@ class Command(BaseCommand):
                 )
 
     def import_comments(self):
-        with open('static/data/comments.csv') as csvfile:
+        with open('static/data/comments.csv', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 Comment.objects.create(
                     id=row['id'],
                     review_id=row['review_id'],
                     text=row['text'],
-                    author=row['author'],
+                    author_id=row['author'],
                     pub_date=row['pub_date']
                 )
 
     def import_genre(self):
-        with open('static/data/genre.csv') as csvfile:
+        with open('static/data/genre.csv', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 Genre.objects.create(
@@ -35,7 +35,7 @@ class Command(BaseCommand):
                 )
 
     def import_genre_title(self):
-        with open('static/data/genre_title.csv') as csvfile:
+        with open('static/data/genre_title.csv', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 GenreTitle.objects.create(
@@ -44,31 +44,31 @@ class Command(BaseCommand):
                 )
 
     def import_review(self):
-        with open('static/data/review.csv') as csvfile:
+        with open('static/data/review.csv', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 Review.objects.create(
                     id=row['id'],
                     title_id=row['title_id'],
                     text=row['text'],
-                    author=row['author'],
+                    author_id=row['author'],
                     score=row['score'],
                     pub_date=row['pub_date']
                 )
 
     def import_titles(self):
-        with open('static/data/titles.csv') as csvfile:
+        with open('static/data/titles.csv', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 Title.objects.create(
                     id=row['id'],
                     name=row['name'],
                     year=row['year'],
-                    category=row['category']
+                    category_id=row['category']
                 )
 
     def import_users(self):
-        with open('static/data/users.csv') as csvfile:
+        with open('static/data/users.csv', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 UserYamDb.objects.create(
@@ -83,10 +83,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.import_category()
-        self.import_comments()
         self.import_genre()
-        self.import_genre_title()
-        self.import_review()
         self.import_titles()
+        self.import_genre_title()
         self.import_users()
+        self.import_review()
+        self.import_comments()
         self.stdout.write(self.style.SUCCESS('Data imported successfully'))
