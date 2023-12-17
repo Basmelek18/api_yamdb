@@ -1,40 +1,40 @@
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
-from django_filters.rest_framework import DjangoFilterBackend
 from django.core.mail import send_mail
 from django.db.models import Avg
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly
 )
-from rest_framework import viewsets, status
+from rest_framework import status, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 
 from api.v1.filter import TitleFilters
+from api.v1.mixins import CreateListDestroyMixin
 from api.v1.permissions import (
-    IsAuthorModeratorAdminOrReadOnly,
     IsAdmin,
     IsAdminOrReadOnly,
+    IsAuthorModeratorAdminOrReadOnly,
 )
-from reviews.models import Category, Title, Review, Genre
 from api.v1.serializers import (
+    CategorySerializer,
     CommentSerializer,
+    ConfirmationCodeSerializer,
+    GenreSerializer,
     ReviewSerializer,
     TitleReadSerializer,
     TitleWriteSerializer,
-    CategorySerializer,
-    GenreSerializer,
-    UpdateUserYamDbSerializer,
-    ConfirmationCodeSerializer,
     TokenSerializer,
+    UpdateUserYamDbSerializer,
     UserYamDbSerializer,
 )
-from api.v1.mixins import CreateListDestroyMixin
+from reviews.models import Category, Genre, Review, Title
 from users.models import UserYamDb
 
 
