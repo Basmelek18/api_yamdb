@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.utils import timezone
 
+from reviews.validators import validate_year
 from users.models import UserYamDb
 
 
@@ -49,16 +49,13 @@ class Title(models.Model):
         verbose_name='Название',
         max_length=256,
     )
-    year = models.PositiveSmallIntegerField(
+    year = models.SmallIntegerField(
         verbose_name='Год выпуска',
-        validators=[
-            MaxValueValidator(timezone.now().year)
-        ],
+        validators=[validate_year],
     )
-    description = models.CharField(
+    description = models.TextField(
         verbose_name='Описание',
         blank=True,
-        max_length=256,
     )
     genre = models.ManyToManyField(
         Genre,
