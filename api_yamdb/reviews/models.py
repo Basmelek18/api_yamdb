@@ -123,7 +123,7 @@ class Review(models.Model):
             ),
             MaxValueValidator(
                 settings.SCORE_MAX,
-                message=f'Оценка не может быть ниже {settings.SCORE_MAX}'
+                message=f'Оценка не может быть выше {settings.SCORE_MAX}'
             )
         ],
         verbose_name='Оценка',

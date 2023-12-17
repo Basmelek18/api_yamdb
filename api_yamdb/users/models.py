@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
-from api.v1.validators import validate_username
+from users.validators import validate_username
 
 
 class UserYamDb(AbstractUser):
@@ -35,11 +35,10 @@ class UserYamDb(AbstractUser):
     )
     role = models.CharField(
         verbose_name='Роль',
-        max_length=20,
+        max_length=settings.MAX_LENGTH_ROLE,
         choices=UserRole.choices,
         default='user'
     )
-    confirmation_code = models.CharField(max_length=6)
 
     class Meta:
         verbose_name = 'Пользователь'
