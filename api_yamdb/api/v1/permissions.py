@@ -37,4 +37,3 @@ class IsAdminOrReadOnly(permissions.BasePermission):
             and (request.user.is_admin
                  or request.user.is_superuser)
         )
-

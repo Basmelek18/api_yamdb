@@ -121,10 +121,7 @@ class ConfirmationCodeSerializer(serializers.Serializer):
             validate_username,
         ],
     )
-    email = serializers.EmailField(
-        max_length=settings.MAX_LENGTH_EMAIL,
-
-    )
+    email = serializers.EmailField(max_length=settings.MAX_LENGTH_EMAIL,)
 
     class Meta:
         model = UserYamDb
@@ -140,7 +137,7 @@ class TokenSerializer(serializers.Serializer):
             validate_username
         ],
     )
-    confirmation_code = serializers.IntegerField()
+    confirmation_code = serializers.CharField()
 
     class Meta:
         model = UserYamDb

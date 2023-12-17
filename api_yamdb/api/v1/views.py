@@ -126,9 +126,21 @@ class SignUpView(APIView):
         serializer = ConfirmationCodeSerializer(data=request.data)
         username = request.data.get('username')
         email = request.data.get('email')
+        user = UserYamDb.objects.all()
 
         if serializer.is_valid(raise_exception=True):
-            user, created = UserYamDb.objects.get_or_create(username=username, email=email)
+            if user.filter(username=username):
+                if user.get(username=username).email != email:
+                    return Response(
+                        {'username': ['Поле email не совпадает с username']},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                if UserYamDb.objects.filter(email=email):
+                    return Response(
+                        {'email': ['данный пользователь не существует']},
+                        status=status.HTTP_400_BAD_REQUEST)
+            user, created = user.get_or_create(username=username, email=email)
             code = default_token_generator.make_token(user)
             send_mail(
                 subject='Ваш код для входа в систему',
@@ -150,7 +162,10 @@ class VerifyCodeView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         user = get_object_or_404(UserYamDb, username=data['username'])
-        if not default_token_generator.check_token(user, str(data.get('confirmation_code'))):
+        if not default_token_generator.check_token(
+                user,
+                str(data.get('confirmation_code'))
+        ):
             return Response(
                 {'confirmation_code': 'Неверный код подтверждения'},
                 status=status.HTTP_400_BAD_REQUEST
