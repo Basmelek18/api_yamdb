@@ -26,7 +26,7 @@ class UserYamDb(AbstractUser):
         max_length=settings.MAX_LENGTH_USERNAME,
         validators=[
             UnicodeUsernameValidator(),
-            validate_username()
+            validate_username
         ],
     )
     bio = models.TextField(

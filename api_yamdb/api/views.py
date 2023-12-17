@@ -1,5 +1,5 @@
-import random
-
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.mail import send_mail
 from django.db.models import Avg
@@ -152,28 +152,14 @@ class SignUpView(APIView):
         serializer = ConfirmationCodeSerializer(data=request.data)
         username = request.data.get('username')
         email = request.data.get('email')
-        code = ''.join(random.choice('123456789') for _ in range(6))
-        user = UserYamDb.objects.all()
 
-        if serializer.is_valid():
-            if user.filter(username=username):
-                if user.get(username=username).email != email:
-                    return Response(
-                        {'username': ['Поле email не совпадает с username']},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-                user.filter(username=username).update(confirmation_code=code)
-            else:
-                if UserYamDb.objects.filter(email=email):
-                    return Response(
-                        {'email': ['данный пользователь не существует']},
-                        status=status.HTTP_400_BAD_REQUEST)
-                UserYamDb.objects.create(username=username,
-                                         email=email, confirmation_code=code)
+        if serializer.is_valid(raise_exception=True):
+            user, created = UserYamDb.objects.get_or_create(username=username, email=email)
+            code = default_token_generator.make_token(user)
             send_mail(
                 subject='Ваш код для входа в систему',
-                message=f'{code}',
-                from_email='from@example.com',
+                message=code,
+                from_email=settings.FROM_EMAIL,
                 recipient_list=[f'{email}'],
                 fail_silently=True,
             )
@@ -189,22 +175,16 @@ class VerifyCodeView(APIView):
         serializer = TokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        try:
-            user = UserYamDb.objects.get(username=data['username'])
-        except UserYamDb.DoesNotExist:
+        user = get_object_or_404(UserYamDb, username=data['username'])
+        if not default_token_generator.check_token(user, str(data.get('confirmation_code'))):
             return Response(
-                {'username': 'Пользователь не найден'},
-                status=status.HTTP_404_NOT_FOUND
+                {'confirmation_code': 'Неверный код подтверждения'},
+                status=status.HTTP_400_BAD_REQUEST
             )
-        if str(data.get('confirmation_code')) == user.confirmation_code:
-            token = AccessToken.for_user(user)
-            return Response(
-                {'token': str(token)},
-                status=status.HTTP_200_OK
-            )
+        token = AccessToken.for_user(user)
         return Response(
-            {'confirmation_code': 'Неверный код подтверждения'},
-            status=status.HTTP_400_BAD_REQUEST
+            {'token': str(token)},
+            status=status.HTTP_200_OK
         )
 
 
@@ -214,7 +194,7 @@ class UserViewSet(viewsets.ModelViewSet):
     Права доступа: Администратор.
     """
     queryset = UserYamDb.objects.all()
-    serializer = UserYamDbSerializer
+    serializer_class = UserYamDbSerializer
     permission_classes = (IsAdmin,)
     filter_backends = (SearchFilter,)
     search_fields = ('username',)
@@ -239,6 +219,3 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def perform_update(self, serializer):
-        serializer.save(role=self.request.user.role, partial=True)

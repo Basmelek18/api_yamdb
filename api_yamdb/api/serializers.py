@@ -1,8 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.core.validators import RegexValidator, EmailValidator
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -119,10 +117,13 @@ class ConfirmationCodeSerializer(serializers.Serializer):
         max_length=settings.MAX_LENGTH_USERNAME,
         validators=[
             UnicodeUsernameValidator(),
-            validate_username()
+            validate_username,
         ],
     )
-    email = serializers.EmailField()
+    email = serializers.EmailField(
+        max_length=settings.MAX_LENGTH_EMAIL,
+
+    )
 
     class Meta:
         model = UserYamDb
@@ -135,7 +136,7 @@ class TokenSerializer(serializers.Serializer):
         max_length=settings.MAX_LENGTH_USERNAME,
         validators=[
             UnicodeUsernameValidator(),
-            validate_username()
+            validate_username
         ],
     )
     confirmation_code = serializers.IntegerField()
@@ -150,9 +151,6 @@ class TokenSerializer(serializers.Serializer):
 
 class UserYamDbSerializer(serializers.ModelSerializer):
     """Сериализатор для работы с моделью user."""
-    username = serializers.CharField()
-    email = serializers.EmailField()
-
     class Meta:
         model = UserYamDb
         fields = (

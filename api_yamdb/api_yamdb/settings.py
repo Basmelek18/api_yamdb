@@ -108,8 +108,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 
+FROM_EMAIL = 'from@example.com'
 
 LEN_TEXT = 256
 
 MAX_LENGTH_USERNAME = 150
 
+MAX_LENGTH_EMAIL = 254
