@@ -3,7 +3,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from api.v1.validators import validate_username
+from users.validators import validate_username
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import UserYamDb
 

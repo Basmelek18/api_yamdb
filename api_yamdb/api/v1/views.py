@@ -164,7 +164,7 @@ class VerifyCodeView(APIView):
         user = get_object_or_404(UserYamDb, username=data['username'])
         if not default_token_generator.check_token(
                 user,
-                str(data.get('confirmation_code'))
+                data.get('confirmation_code')
         ):
             return Response(
                 {'confirmation_code': 'Неверный код подтверждения'},
