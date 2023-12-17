@@ -1,12 +1,11 @@
 from django.conf import settings
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from rest_framework import serializers
 from django.shortcuts import get_object_or_404
-from rest_framework.validators import UniqueValidator
+from rest_framework import serializers
 
+from api.v1.validators import validate_username
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import UserYamDb
-from api.v1.validators import validate_username
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -120,7 +119,7 @@ class ConfirmationCodeSerializer(serializers.Serializer):
         validators=[
             UnicodeUsernameValidator(),
             validate_username,
-        ]
+        ],
     )
     email = serializers.EmailField(max_length=settings.MAX_LENGTH_EMAIL,)
 
