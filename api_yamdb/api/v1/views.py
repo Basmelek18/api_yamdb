@@ -15,14 +15,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .filter import TitleFilters
-from .permissions import (
+from api.v1.filter import TitleFilters
+from api.v1.permissions import (
     IsAuthorModeratorAdminOrReadOnly,
     IsAdmin,
     IsAdminOrReadOnly,
 )
 from reviews.models import Category, Title, Review, Genre
-from .serializers import (
+from api.v1.serializers import (
     CommentSerializer,
     ReviewSerializer,
     TitleReadSerializer,
@@ -34,7 +34,7 @@ from .serializers import (
     TokenSerializer,
     UserYamDbSerializer,
 )
-from .mixins import CreateListDestroyMixin
+from api.v1.mixins import CreateListDestroyMixin
 from users.models import UserYamDb
 
 

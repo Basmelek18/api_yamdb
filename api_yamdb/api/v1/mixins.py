@@ -1,7 +1,7 @@
 from rest_framework import viewsets, mixins
 from rest_framework.filters import SearchFilter
 
-from .permissions import (IsAdminOrReadOnly,)
+from api.v1.permissions import (IsAdminOrReadOnly,)
 
 
 class CreateListDestroyMixin(

@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import UserYamDb
-from api.validators import validate_username
+from api.v1.validators import validate_username
 
 
 class CategorySerializer(serializers.ModelSerializer):
