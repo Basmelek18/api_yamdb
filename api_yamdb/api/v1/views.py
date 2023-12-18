@@ -127,40 +127,39 @@ class SignUpView(APIView):
         username = request.data.get('username')
         email = request.data.get('email')
         user = UserYamDb.objects.all()
-        if serializer.is_valid(raise_exception=True):
-            username_from_data = UserYamDb.objects.filter(
-                username=username
-            ).first()
-            email_from_data = UserYamDb.objects.filter(email=email).first()
-            if email_from_data != username_from_data:
-                if username_from_data is None:
-                    return Response(
-                        {'email': ['Поле email не совпадает с username']},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-                if email_from_data is None:
-                    return Response(
-                        {'username': ['Поле username не совпадает с email']},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
+        serializer.is_valid(raise_exception=True)
+        username_from_data = UserYamDb.objects.filter(
+            username=username
+        ).first()
+        email_from_data = UserYamDb.objects.filter(email=email).first()
+        if email_from_data != username_from_data:
+            if username_from_data is None:
                 return Response(
-                    {
-                        'username': ['Поле username не совпадает с email'],
-                        'email': ['Поле email не совпадает с username']
-                    },
+                    {'email': ['Поле email не совпадает с username']},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            user, created = user.get_or_create(username=username, email=email)
-            code = default_token_generator.make_token(user)
-            send_mail(
-                subject='Ваш код для входа в систему',
-                message=code,
-                from_email=settings.FROM_EMAIL,
-                recipient_list=[f'{email}'],
-                fail_silently=True,
+            if email_from_data is None:
+                return Response(
+                    {'username': ['Поле username не совпадает с email']},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            return Response(
+                {
+                    'username': ['Поле username не совпадает с email'],
+                    'email': ['Поле email не совпадает с username']
+                },
+                status=status.HTTP_400_BAD_REQUEST
             )
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user, created = user.get_or_create(username=username, email=email)
+        code = default_token_generator.make_token(user)
+        send_mail(
+            subject='Ваш код для входа в систему',
+            message=code,
+            from_email=settings.FROM_EMAIL,
+            recipient_list=[f'{email}'],
+            fail_silently=True,
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class VerifyCodeView(APIView):
