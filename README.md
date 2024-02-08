@@ -1,5 +1,6 @@
 # YaMDb Project
 
+
 The YaMDb project collects user reviews of works. The works themselves are not stored in YaMDb, 
 you cannot watch a movie or listen to music here. Works are divided into categories, 
 such as "Books", "Movies", "Music". For example, in the category "Books" there can be the works 
@@ -14,9 +15,13 @@ Users can leave comments on reviews. Only authenticated users can add reviews, c
 
 # Development team:
 
+
+# Development team:
+
 - [Viacheslav Ispaniuk](https://github.com/Basmelek18) (Developer 1 - Team Lead)
 - [Vladislav Ishmukhametov](https://github.com/VladIshmukhametov) (Developer 2)
 - [Igor Dolgonosov](https://github.com/Ugar78) (Developer 3) 
+
 
 
 # Technology stack used in the project:
@@ -54,6 +59,7 @@ python3 manage.py runserver
 ```
 
 # Examples of working with API for all users
+
 
 ### API documentation
 The documentation can be found at `http://127.0.0.1:8000/redoc/`

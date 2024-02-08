@@ -40,8 +40,8 @@ from users.models import UserYamDb
 
 class CategoryViewSet(CreateListDestroyMixin):
     """
-    Представление модели Category.
-    Обрабатывает запросы GET, POST и DELETE с учетом прав доступа.
+    Category model representation.
+    Handles GET, POST, and DELETE requests based on access rights.
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -49,8 +49,8 @@ class CategoryViewSet(CreateListDestroyMixin):
 
 class GenreViewSet(CreateListDestroyMixin):
     """
-    Представление модели Genre.
-    Обрабатывает запросы GET, POST и DELETE с учетом прав доступа.
+    Genre model representation.
+    Handles GET, POST and DELETE requests with respect to access rights.
     """
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
@@ -58,8 +58,8 @@ class GenreViewSet(CreateListDestroyMixin):
 
 class TitleViewSet(viewsets.ModelViewSet):
     """
-    Представление модели Title.
-    Обрабатывает все запросы с учетом прав доступа.
+    Title model representation.
+    Processes all requests taking into account access rights.
     """
     queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     permission_classes = (IsAdminOrReadOnly,)
@@ -74,7 +74,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    """Представление модели Review."""
+    """Review Model Representation."""
     serializer_class = ReviewSerializer
     permission_classes = (
         IsAuthorModeratorAdminOrReadOnly,
@@ -95,7 +95,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    """Представление модели Comment."""
+    """Comment model representation."""
     serializer_class = CommentSerializer
     permission_classes = (
         IsAuthorModeratorAdminOrReadOnly,
@@ -119,8 +119,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class SignUpView(APIView):
     """
-    Получить код подтверждения на переданный email. Права доступа: Доступно без
-    токена.
+    Receive a confirmation code on the transmitted email. Access rights: Available without
+    token.
     """
     def post(self, request):
         serializer = ConfirmationCodeSerializer(data=request.data)
@@ -135,25 +135,25 @@ class SignUpView(APIView):
         if email_from_data != username_from_data:
             if username_from_data is None:
                 return Response(
-                    {'email': ['Поле email не совпадает с username']},
+                    {'email': ['The email field does not match username']},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             if email_from_data is None:
                 return Response(
-                    {'username': ['Поле username не совпадает с email']},
+                    {'username': ['The username field does not match the email']},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             return Response(
                 {
-                    'username': ['Поле username не совпадает с email'],
-                    'email': ['Поле email не совпадает с username']
+                    'username': ['The username field does not match the email'],
+                    'email': ['The email field does not match username']
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
         user, created = user.get_or_create(username=username, email=email)
         code = default_token_generator.make_token(user)
         send_mail(
-            subject='Ваш код для входа в систему',
+            subject='Your login code',
             message=code,
             from_email=settings.FROM_EMAIL,
             recipient_list=[f'{email}'],
@@ -164,7 +164,7 @@ class SignUpView(APIView):
 
 class VerifyCodeView(APIView):
     """
-    Получение JWT-токена в обмен на username и confirmation code.
+    Receive JWT token in exchange for username and confirmation code.
     """
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
@@ -176,7 +176,7 @@ class VerifyCodeView(APIView):
                 data.get('confirmation_code')
         ):
             return Response(
-                {'confirmation_code': 'Неверный код подтверждения'},
+                {'confirmation_code': 'Invalid confirmation code'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         token = AccessToken.for_user(user)
@@ -188,8 +188,8 @@ class VerifyCodeView(APIView):
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    Получение списка всех пользователей.
-    Права доступа: Администратор.
+    Get a list of all users.
+    Access rights: Administrator.
     """
     queryset = UserYamDb.objects.all()
     serializer_class = UserYamDbSerializer

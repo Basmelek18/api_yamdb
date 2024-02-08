@@ -9,14 +9,14 @@ from users.models import UserYamDb
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Category."""
+    """A serializer for the Category model."""
     class Meta:
         exclude = ('id',)
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Genre."""
+    """Serializer for the Genre model."""
     class Meta:
         exclude = ('id',)
         model = Genre
@@ -24,8 +24,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleReadSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для модели Title.
-    Только для операций чтения.
+    Serializer for the Title model.
+    For read operations only.
     """
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
@@ -46,8 +46,8 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
 class TitleWriteSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для модели Title.
-    Только для операций записи.
+    Serializer for the Title model.
+    For write operations only.
     """
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
@@ -71,7 +71,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Review."""
+    """A serializer for the Review model."""
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True
@@ -83,8 +83,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """
-        Проверяет не писал ли уже автор POST запроса
-        отзыв на это произведение раньше.
+        Checks to see if the author of the POST request has already written
+        has written a review of this work before.
         """
         request = self.context['request']
         if request.method != 'POST':
@@ -95,13 +95,13 @@ class ReviewSerializer(serializers.ModelSerializer):
             author=request.user, title=title
         ).exists():
             raise serializers.ValidationError(
-                'Можно оставить только один отзыв!'
+                'You can only leave one review!'
             )
         return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Comment."""
+    """A serializer for the Comment model."""
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True
@@ -113,7 +113,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class ConfirmationCodeSerializer(serializers.Serializer):
-    """Сериализатор для регистрации и отправки кода на email."""
+    """Serializer to register and send code to email."""
     username = serializers.CharField(
         max_length=settings.MAX_LENGTH_USERNAME,
         validators=[
@@ -129,7 +129,7 @@ class ConfirmationCodeSerializer(serializers.Serializer):
 
 
 class TokenSerializer(serializers.Serializer):
-    """Сериализатор для работы с токеном JWT."""
+    """Serializer for working with JWT token."""
     username = serializers.CharField(
         max_length=settings.MAX_LENGTH_USERNAME,
         validators=[
@@ -148,7 +148,7 @@ class TokenSerializer(serializers.Serializer):
 
 
 class UserYamDbSerializer(serializers.ModelSerializer):
-    """Сериализатор для работы с моделью user."""
+    """Serializer for working with the user model."""
     class Meta:
         model = UserYamDb
         fields = (
