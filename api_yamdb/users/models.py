@@ -7,7 +7,7 @@ from users.validators import validate_username
 
 
 class UserYamDb(AbstractUser):
-    """Модель кастомного пользователя."""
+    """Custom User Model."""
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('first_name', 'last_name', 'username')
 
@@ -17,11 +17,11 @@ class UserYamDb(AbstractUser):
         MODERATOR = 'moderator'
 
     email = models.EmailField(
-        verbose_name='Электронная почта',
+        verbose_name='Email',
         unique=True,
     )
     username = models.CharField(
-        verbose_name='Имя пользователя',
+        verbose_name='Username',
         unique=True,
         max_length=settings.MAX_LENGTH_USERNAME,
         validators=[
@@ -30,19 +30,19 @@ class UserYamDb(AbstractUser):
         ],
     )
     bio = models.TextField(
-        verbose_name='Биография',
+        verbose_name='Biography',
         blank=True
     )
     role = models.CharField(
-        verbose_name='Роль',
+        verbose_name='Role',
         max_length=settings.MAX_LENGTH_ROLE,
         choices=UserRole.choices,
         default='user'
     )
 
     class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
         ordering = ('last_name', 'first_name')
 
     @property
