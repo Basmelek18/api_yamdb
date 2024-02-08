@@ -66,21 +66,22 @@ The documentation can be found at `http://127.0.0.1:8000/redoc/`
 
 Users interact with the YaMDb authentication system through a series of HTTP requests, as outlined below:
 
-User Registration:
+## User Registration:
 
-The user initiates the registration process by sending a POST request to the /api/v1/auth/signup/ endpoint.
-The request includes parameters such as email and username.
-Upon receiving the request, YaMDB generates a confirmation code and sends it to the provided email address for verification.
-Email Verification:
+- The user initiates the registration process by sending a POST request to the /api/v1/auth/signup/ endpoint.
+- The request includes parameters such as email and username.
+- Upon receiving the request, YaMDB generates a confirmation code and sends it to the provided email address for verification.
+  
+## Email Verification:
 
-The user then sends a POST request to the /api/v1/auth/token/ endpoint.
-The request contains parameters including username and the confirmation code received via email.
-In response, YaMDB processes the verification, and if successful, issues a token (JWT token) to the user.
-Profile Completion (Optional):
+- The user then sends a POST request to the /api/v1/auth/token/ endpoint.
+- The request contains parameters including username and the confirmation code received via email.
+- In response, YaMDB processes the verification, and if successful, issues a token (JWT token) to the user.
+## Profile Completion (Optional):
 
-If the user wishes to provide additional information and complete their profile, they can send a PATCH request to the /api/v1/users/me/ endpoint.
-The PATCH request allows the user to fill in various fields within their profile.
-Detailed field descriptions can be found in the documentation.
+- If the user wishes to provide additional information and complete their profile, they can send a PATCH request to the /api/v1/users/me/ endpoint.
+- The PATCH request allows the user to fill in various fields within their profile.
+- Detailed field descriptions can be found in the documentation.
 This workflow ensures a secure and streamlined user registration process. After confirming their identity through the confirmation code, users gain access to the system with a JWT token. Additionally, users have the option to enhance their profiles by providing additional details as part of the registration process. The clear API endpoints facilitate a seamless user experience, allowing users to manage their accounts effectively.
 
 ### User Roles
@@ -88,28 +89,32 @@ This workflow ensures a secure and streamlined user registration process. After 
 
 In the YaMDb project, different roles grant varying levels of access and permissions to users. Here's an overview of the roles and their associated rights:
 
-Anonymous User:
+## Anonymous User:
 
-Can view descriptions of works.
-Can read reviews and comments.
-Authenticated User (User):
+- Can view descriptions of works.
+- Can read reviews and comments.
+- Authenticated User (User):
 
-Inherits the rights of an Anonymous User.
-Can post reviews.
-Can rate works (movies/books/songs).
-Can comment on other people's reviews.
-Can edit and delete their own reviews and comments.
-By default, every new user is assigned this role.
-Moderator:
+## Inherits the rights of an Anonymous User.
+- Can post reviews.
+- Can rate works (movies/books/songs).
+- Can comment on other people's reviews.
+- Can edit and delete their own reviews and comments.
+- By default, every new user is assigned this role.
+  
+## Moderator:
 
-Possesses all the rights of an Authenticated User.
-Can delete any reviews and comments.
-Administrator (Admin):
+- Possesses all the rights of an Authenticated User.
+- Can delete any reviews and comments.
+  
+## Administrator (Admin):
 
-Full rights to manage all content in the project.
-Can create and delete works, categories, and genres.
-Can assign roles to users.
-Django Superuser:
+## Full rights to manage all content in the project.
+- Can create and delete works, categories, and genres.
+- Can assign roles to users.
+  
+## Django Superuser:
 
-Possesses administrator (admin) rights.
+- Possesses administrator (admin) rights.
+  
 These roles ensure a structured system where users, based on their role assignments, can perform specific actions within the YaMDb project. While Authenticated Users have the ability to contribute reviews and comments, Moderators and Administrators have additional responsibilities and powers to manage and oversee the content and user roles. Django Superusers hold the highest level of authority with full administrative rights. This role-based access control allows for effective content management and user engagement within the platform.
