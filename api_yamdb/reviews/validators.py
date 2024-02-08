@@ -5,5 +5,5 @@ from django.utils import timezone
 def validate_year(value):
     if value > timezone.now().year:
         raise ValidationError(
-            'Нельзя добавлять произведения, которые еще не вышли'
+            'You cant add works that havent been released yet'
         )

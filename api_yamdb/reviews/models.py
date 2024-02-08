@@ -8,15 +8,15 @@ from users.models import UserYamDb
 
 class BaseModel(models.Model):
     """
-    Абстрактная модель.
-    Добавляет к модели название и slug.
+    Abstract model.
+    Adds a name and slug to the model.
     """
     name = models.CharField(
-        verbose_name='Название',
+        verbose_name='Title',
         max_length=settings.LEN_TEXT,
     )
     slug = models.SlugField(
-        verbose_name='Слаг',
+        verbose_name='Slug',
         unique=True,
     )
 
@@ -28,44 +28,44 @@ class BaseModel(models.Model):
 
 
 class Genre(BaseModel):
-    """Модуль жанры."""
+    """Genres Module."""
     class Meta:
-        verbose_name = 'Жанр'
-        verbose_name_plural = 'Жанры'
+        verbose_name = 'Genre'
+        verbose_name_plural = 'Genres'
         ordering = ('name',)
 
 
 class Category(BaseModel):
-    """Модель категорий."""
+    """Category model."""
     class Meta:
-        verbose_name = 'Категория'
-        verbose_name_plural = 'Категории'
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
         ordering = ('name',)
 
 
 class Title(models.Model):
-    """Модель произведений"""
+    """A model of the works"""
     name = models.CharField(
-        verbose_name='Название',
+        verbose_name='Title',
         max_length=settings.LEN_TEXT,
     )
     year = models.SmallIntegerField(
-        verbose_name='Год выпуска',
+        verbose_name='Year of release',
         validators=[validate_year],
     )
     description = models.TextField(
-        verbose_name='Описание',
+        verbose_name='Description',
         blank=True,
     )
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
-        verbose_name='Жанр',
+        verbose_name='Genre',
         related_name='title_genre'
     )
     category = models.ForeignKey(
         Category,
-        verbose_name='Категории',
+        verbose_name='Categories',
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -73,8 +73,8 @@ class Title(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Произведение'
-        verbose_name_plural = 'Произведения'
+        verbose_name = 'Work'
+        verbose_name_plural = 'Works'
         ordering = ('year', 'name')
 
     def __str__(self):
@@ -82,7 +82,7 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
-    """Модель связи произведений и жанров"""
+    """A model of the relationship between works and genres"""
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -99,43 +99,43 @@ class GenreTitle(models.Model):
 
 
 class Review(models.Model):
-    """Модель отзывов."""
+    """Model Reviews."""
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name='Произведение',
+        verbose_name='Work',
     )
     text = models.TextField(
-        verbose_name='Текст отзыва',
+        verbose_name='Text of feedback',
     )
     author = models.ForeignKey(
         UserYamDb,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name='Автор',
+        verbose_name='Author',
     )
     score = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(
                 settings.SCORE_MIN,
-                message=f'Оценка не может быть ниже {settings.SCORE_MIN}'
+                message=f'The grade cannot be lower than {settings.SCORE_MIN}'
             ),
             MaxValueValidator(
                 settings.SCORE_MAX,
-                message=f'Оценка не может быть выше {settings.SCORE_MAX}'
+                message=f'The grade cant be higher {settings.SCORE_MAX}'
             )
         ],
-        verbose_name='Оценка',
+        verbose_name='Grade',
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Дата публикации',
+        verbose_name='Publication date',
     )
 
     class Meta:
-        verbose_name = 'Отзыв'
-        verbose_name_plural = 'Отзывы'
+        verbose_name = 'Review'
+        verbose_name_plural = 'Reviews'
         constraints = [
             models.UniqueConstraint(
                 fields=('title', 'author',),
@@ -148,30 +148,30 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
-    """Модель комментариев."""
+    """Comment Model."""
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
         related_name='comments',
-        verbose_name='Отзыв',
+        verbose_name='Review',
     )
     text = models.TextField(
-        verbose_name='Текст комментария',
+        verbose_name='Comment text',
     )
     author = models.ForeignKey(
         UserYamDb,
         on_delete=models.CASCADE,
         related_name='comments',
-        verbose_name='Автор',
+        verbose_name='Author',
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Дата публикации',
+        verbose_name='Publication date',
     )
 
     class Meta:
-        verbose_name = 'Комментарий'
-        verbose_name_plural = 'Комментарии'
+        verbose_name = 'Comment'
+        verbose_name_plural = 'Comments'
 
     def __str__(self):
         return self.text

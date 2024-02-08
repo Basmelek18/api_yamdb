@@ -10,7 +10,7 @@ class CreateListDestroyMixin(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
-    """Кастомный миксин для Create, List, Delete операций"""
+    """Custom mixin for Create, List, Delete operations"""
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
