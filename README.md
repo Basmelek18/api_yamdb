@@ -1,22 +1,25 @@
-# Проект YaMDb
+# YaMDb Project
 
-Проект YaMDb собирает отзывы пользователей на произведения. Сами произведения в YaMDb не хранятся, здесь нельзя посмотреть фильм или послушать музыку.
-Произведения делятся на категории, такие как «Книги», «Фильмы», «Музыка». Например, в категории «Книги» могут быть произведения «Винни-Пух и все-все-все» и «Марсианские хроники», а в категории «Музыка» — песня «Давеча» группы «Жуки» и вторая сюита Баха. Список категорий может быть расширен (например, можно добавить категорию «Изобразительное искусство» или «Ювелирка»). 
-Произведению может быть присвоен жанр из списка предустановленных (например, «Сказка», «Рок» или «Артхаус»). 
-Добавлять произведения, категории и жанры может только администратор.
-Благодарные или возмущённые пользователи оставляют к произведениям текстовые отзывы и ставят произведению оценку в диапазоне от одного до десяти (целое число); из пользовательских оценок формируется усреднённая оценка произведения — рейтинг (целое число). На одно произведение пользователь может оставить только один отзыв.
-Пользователи могут оставлять комментарии к отзывам.
-Добавлять отзывы, комментарии и ставить оценки могут только аутентифицированные пользователи.
+The YaMDb project collects user reviews of works. The works themselves are not stored in YaMDb, 
+you cannot watch a movie or listen to music here. Works are divided into categories, 
+such as "Books", "Movies", "Music". For example, in the category "Books" there can be the works 
+"Winnie the Pooh and Everything" and "The Martian Chronicles", and in the category "Music" 
+there can be the song "Moskau" by the band "Rammstein" and the second suite by Bach. The list 
+of categories can be expanded (for example, you can add the category "Fine Arts" or "Jewelry").
+A work can be assigned a genre from a list of preset genres (e.g., Fairy Tale, Rock, or Art House).
+Only the administrator can add works, categories and genres. Grateful or indignant users leave text
+reviews for the works and give the work a rating in the range from one to ten (integer); an average
+rating (integer) is formed from the user ratings. A user can leave only one review per work.
+Users can leave comments on reviews. Only authenticated users can add reviews, comments and give ratings.
+
+# Development team:
+
+- [Viacheslav Ispaniuk](https://github.com/Basmelek18) (Developer 1 - Team Lead)
+- [Vladislav Ishmukhametov](https://github.com/VladIshmukhametov) (Developer 2)
+- [Igor Dolgonosov](https://github.com/Ugar78) (Developer 3) 
 
 
-# Комманда разработки:
-
-- [Вячеслав Испанюк](https://github.com/Basmelek18) (Разработчик 1 - Тимлид)
-- [Владислав Ишмухаметов](https://github.com/VladIshmukhametov) (Разработчик 2)
-- [Игорь Долгоносов](https://github.com/Ugar78) (Раработчик 3) 
-
-
-# Стек технологий использованных в проекте:
+# Technology stack used in the project:
 
 - Python 3.9
 - Django 3.2
@@ -24,50 +27,56 @@
 - JWT
 
 
-# Запуск проекта:
+# Project launch:
 
-Клонировать репозиторий и перейти в него в командной строке.
-Cоздать и активировать виртуальное окружение:
+Clone the repository and navigate to it on the command line.
+Create and activate a virtual environment:
 ```
 python3 -m venv venv
 source env/bin/activate
 ```
-Установить зависимости из файла requirements.txt:
+Install dependencies from the file requirements.txt:
 ```
 python3 -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
-Выполнить миграции:
+Perform migrations:
 ```
 python3 manage.py migrate
 ```
-Заполнить базу данных из csv файла:
+Fill database from csv file:
 ```
 python3 manage.py import_csv
 ```
-Запустить проект:
+Run the project:
 ```
 python3 manage.py runserver
 ```
 
-# Примеры работы с API для всех пользователей
+# Examples of working with API for all users
 
-### Документация к API
-Документация находиться по адресу `http://127.0.0.1:8000/redoc/`
-
-
-### Алгоритм регистрации пользователей
-
-Пользователь отправляет POST-запрос на добавление нового пользователя с параметрами email и username на эндпоинт /api/v1/auth/signup/.
-YaMDB отправляет письмо с кодом подтверждения (confirmation_code) на адрес email.
-Пользователь отправляет POST-запрос с параметрами username и confirmation_code на эндпоинт /api/v1/auth/token/, в ответе на запрос ему приходит token (JWT-токен).
-При желании пользователь отправляет PATCH-запрос на эндпоинт /api/v1/users/me/ и заполняет поля в своём профайле (описание полей — в документации).
+### API documentation
+The documentation can be found at `http://127.0.0.1:8000/redoc/`
 
 
-### Пользовательские роли
+### User registration algorithm
 
-Аноним — может просматривать описания произведений, читать отзывы и комментарии.
-Аутентифицированный пользователь (user) — может, как и Аноним, читать всё, дополнительно он может публиковать отзывы и ставить оценку произведениям (фильмам/книгам/песенкам), может комментировать чужие отзывы; может редактировать и удалять свои отзывы и комментарии. Эта роль присваивается по умолчанию каждому новому пользователю.
-Модератор (moderator) — те же права, что и у Аутентифицированного пользователя плюс право удалять любые отзывы и комментарии.
-Администратор (admin) — полные права на управление всем контентом проекта. Может создавать и удалять произведения, категории и жанры. Может назначать роли пользователям.
-Суперюзер Django — обладет правами администратора (admin)
+The user sends a POST request to add a new user with email and username parameters 
+to the /api/v1/auth/signup/ endpoint. YaMDB sends an email with confirmation code to 
+the email address. The user sends a POST-request with username and confirmation code 
+to the /api/v1/auth/token/ endpoint, and receives a token (JWT token) in response to 
+the request. If desired, the user sends a PATCH-request to the /api/v1/users/me/ endpoint 
+and fills in the fields in his profile (see documentation for field descriptions).
+
+### User Roles
+
+Anonymous - can view descriptions of works, read reviews and comments. 
+Authenticated user (user) - can, like Anonymous, read everything,
+additionally he can post reviews and rate works (movies/books/songs), 
+can comment on other people's reviews; can edit and delete his reviews
+and comments. This role is assigned by default to every new user. 
+Moderator (moderator) - the same rights as an Authenticated User plus 
+the right to delete any reviews and comments. Administrator (admin) - 
+full rights to manage all content of the project. Can create and delete works, 
+categories and genres. Can assign roles to users. Django Superuser - has administrator 
+(admin) rights
